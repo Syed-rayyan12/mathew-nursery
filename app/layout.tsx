@@ -34,10 +34,9 @@ export default function RootLayout({
       <body
         className={`${bebasNeue.variable} ${k2D.variable} antialiased`}
       >
-        <MiniNav />
-        <Header />
+
         {children}
-        <Footer />
+       
       </body>
     </html>
   );

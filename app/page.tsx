@@ -18,7 +18,8 @@ const page = () => {
   return (
     <>
       
-      
+      <MiniNav />
+      <Header />
       <HeroBanner />
       <FeaturesSection />
       <AboutUsSection />
@@ -30,6 +31,7 @@ const page = () => {
        <TestimonialSlider />
         <ArticleNews />
         <NewsletterSignup/>
+         <Footer />
 
 
     </>

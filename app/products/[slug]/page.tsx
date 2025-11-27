@@ -3,9 +3,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Clock, Heart, LocateIcon, LocationEdit, Mail, Phone, Star, Timer } from "lucide-react";
+import Header from "@/components/landing-page/header";
+import MiniNav from "@/components/landing-page/little-nav";
+import Footer from "@/components/landing-page/footer";
 
 export default function NurseryDetailsPage() {
   return (
+    <>
+     <MiniNav/>
+    <Header/>
     <div className="w-full mx-auto  py-10 px-24 shadow-xl bg-white">
       {/* HEADER SECTION */}
       <div className="bg-white p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
@@ -255,5 +261,7 @@ export default function NurseryDetailsPage() {
         </Card>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
