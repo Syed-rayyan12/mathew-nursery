@@ -205,7 +205,7 @@ export default function NotificationPanel() {
 
                                 {/* ✅ Time + Status */}
                                 <div className="flex items-center gap-3 mt-2">
-                                    <Badge className={`${statusColor[n.status]}`}>
+                                    <Badge className={`${statusColor[n.status as keyof typeof statusColor]}`}>
                                         {n.status}
                                     </Badge>
 
