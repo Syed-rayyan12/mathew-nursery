@@ -20,13 +20,16 @@ export default function Header() {
           <Link href="/" className="hover:text-primary transition">Home</Link>
           <Link href="/products" className="hover:text-primary transition">Find Nursery</Link>
           <Link href="/nursery-group" className="hover:text-primary transition">Groups</Link>
+           <Link href="/submit-review" className="hover:text-primary transition">Submit & Review</Link>
           <Link href="/about" className="hover:text-primary transition">About</Link>
         </nav>
 
         {/* RIGHT BUTTON */}
-        <button className="bg-primary hover:bg-transparent hover:text-primary border-2 transition-all duration-300 cursor-pointer border-primary text-white rounded-[6px] px-8 py-2">
+        <Link href="/contact-us">
+        <button  className="bg-primary hover:bg-transparent hover:text-primary border-2 transition-all duration-300 cursor-pointer border-primary text-white rounded-[6px] px-8 py-2">
            Contact Us
         </button>
+        </Link>
 
         {/* MOBILE MENU ICON */}
         <Menu
