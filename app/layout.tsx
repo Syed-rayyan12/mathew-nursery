@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bebas_Neue, K2D } from "next/font/google";
 import "./globals.css";
+import Header from "../components/landing-page/header";
+import Footer from "../components/landing-page/footer";
+import MiniNav from "@/components/landing-page/little-nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bebasNeue = Bebas_Neue({
+  variable: "--font-bebas-neue",
   subsets: ["latin"],
+  weight: "400",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const k2D = K2D({
+  variable: "--font-k2d",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
 });
+
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,9 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${bebasNeue.variable} ${k2D.variable} antialiased`}
       >
+        <MiniNav />
+        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
