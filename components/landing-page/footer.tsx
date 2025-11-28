@@ -47,10 +47,10 @@ export default function Footer() {
         <div>
            <h3 className="text-lg  font-medium font-heading font-semibold mb-4 text-[22px] text-white">Support</h3>
            <ul className="space-y-2 leading-8">
-             <li><Link href="/faq" className="text-white hover:text-gray-300 hover:underline">Help With Childcare Costs</Link></li>
-             <li><Link href="/help" className="text-white hover:text-gray-300 hover:underline">Claim 6-Month Free Listing </Link></li>
+             <li><Link href="/childcare" className="text-white hover:text-gray-300 hover:underline">Help With Childcare Costs</Link></li>
+             <li><Link href="/claim" className="text-white hover:text-gray-300 hover:underline">Claim 6-Month Free Listing </Link></li>
              <li><Link href="/support" className="text-white hover:text-gray-300 hover:underline">Pricing/Subscription Page</Link></li>
-             <li><Link href="/contact" className="text-white hover:text-gray-300 hover:underline">Contact Support</Link></li>
+             <li><Link href="/review" className="text-white hover:text-gray-300 hover:underline">Review</Link></li>
            </ul>
          </div>
         {/* Get in Touch */}
@@ -75,11 +75,11 @@ export default function Footer() {
       <div className="flex justify-between items-center border-t mt-8 pt-4 text-white max-w-6xl mx-auto">
         <p>© 2025 My Nursery. All rights reserved.</p>
         <div className="flex gap-4">
-          <Link href="/terms" className="text-white hover:text-gray-300 hover:underline">Terms and Condition</Link>
+          <Link href="/terms-condition" className="text-white hover:text-gray-300 hover:underline">Terms and Condition</Link>
           <span>|</span>
-          <Link href="/privacy" className="text-white hover:text-gray-300 hover:underline">Privacy Policy</Link>
+          <Link href="/privacy-policy" className="text-white hover:text-gray-300 hover:underline">Privacy Policy</Link>
           <span>|</span>
-          <Link href="/cookie" className="text-white hover:text-gray-300 hover:underline">Cookie Policy</Link>
+          <Link href="/cookie-policy" className="text-white hover:text-gray-300 hover:underline">Cookie Policy</Link>
         </div>
       </div>
     </footer>

@@ -135,7 +135,7 @@ const SubmitReviewForm = () => {
 
         {/* Review Guidelines Card */}
         <div className="bg-white shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] mt-8 rounded-[6px] p-6">
-          <h2 className="text-2xl font-heading font-bold mb-4">Review Guidelines</h2>
+          <h2 className="text-2xl font-heading font-medium mb-4">Review Guidelines</h2>
           <ul className="space-y-3 text-gray-700">
             <li className="flex items-start gap-3">
               <span className="text-secondary mt-1">•</span>

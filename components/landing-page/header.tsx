@@ -21,7 +21,8 @@ export default function Header() {
           <Link href="/products" className="hover:text-primary transition">Find Nursery</Link>
           <Link href="/nursery-group" className="hover:text-primary transition">Groups</Link>
            <Link href="/submit-review" className="hover:text-primary transition">Submit & Review</Link>
-          <Link href="/about" className="hover:text-primary transition">About</Link>
+          <Link href="/article" className="hover:text-primary transition">Article</Link>
+                    <Link href="/about" className="hover:text-primary transition">About</Link>
         </nav>
 
         {/* RIGHT BUTTON */}

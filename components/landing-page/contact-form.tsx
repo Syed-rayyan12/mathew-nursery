@@ -20,8 +20,8 @@ Connect with our team today</p>
             <div className="space-y-4">
               {/* Location */}
               <div className="flex items-start gap-3">
-                <div className='flex justify-center items-center w-8 h-8 '>
-                <MapPin className="w-6 h-6 text-secondary mt-1 flex justify-center items-center p-4" />
+                <div className='flex justify-center  items-center w-10 h-10 border border-gray-400 rounded-full '>
+                <MapPin className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
                   <p className="text-gray-700">123 Nursery Lane, London, UK</p>
@@ -31,7 +31,9 @@ Connect with our team today</p>
 
               {/* Email */}
               <div className="flex items-center gap-3">
-                <Mail className="w-6 h-6 text-secondary flex justify-center items-center p-4" />
+                 <div className='flex justify-center  items-center w-10 h-10 border border-gray-400 rounded-full '>
+                <Mail className="w-5 h-5 text-secondary" />
+                 </div>
                 <a href="mailto:info@nursery.com" className="text-gray-700 hover:text-secondary">
                   info@nursery.com
                 </a>
@@ -39,7 +41,9 @@ Connect with our team today</p>
 
               {/* Phone */}
               <div className="flex items-center gap-3">
-                <Phone className="w-6 h-6 text-secondary flex justify-center items-center p-4" />
+                 <div className='flex justify-center  items-center w-10 h-10 border border-gray-400 rounded-full '>
+                <Phone className="w-5 h-5 text-secondary" />
+                 </div>
                 <a href="tel:+441234567890" className="text-gray-700 hover:text-secondary">
                   +44 (123) 456-7890
                 </a>
@@ -52,25 +56,25 @@ Connect with our team today</p>
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center hover:border-secondary transition-colors"
+                className="w-12 h-12 rounded-full border-1 border-gray-200 flex items-center justify-center hover:border-secondary transition-colors"
               >
                 <Facebook className="w-5 h-5 text-secondary" />
               </a>
               <a
                 href="#"
-                className="w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center hover:border-secondary transition-colors"
+                className="w-12 h-12 rounded-full border-1 border-gray-200 flex items-center justify-center hover:border-secondary transition-colors"
               >
                 <Twitter className="w-5 h-5 text-secondary" />
               </a>
               <a
                 href="#"
-                className="w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center hover:border-secondary transition-colors"
+                className="w-12 h-12 rounded-full border-1 border-gray-200 flex items-center justify-center hover:border-secondary transition-colors"
               >
                 <Youtube className="w-5 h-5 text-secondary" />
               </a>
               <a
                 href="#"
-                className="w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center hover:border-secondary transition-colors"
+                className="w-12 h-12 rounded-full border-1 border-gray-200 flex items-center justify-center hover:border-secondary transition-colors"
               >
                 <Instagram className="w-5 h-5 text-secondary" />
               </a>
