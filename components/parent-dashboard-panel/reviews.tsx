@@ -1,54 +1,99 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { apiClient } from '@/lib/api/client';
+import { toast } from 'sonner';
 
-// Dummy data for mapping
-const reviews = [
-  {
-    nursery: 'Little Learners Nursery',
-    date: 'Oct 21, 2025',
-    rating: '⭐ 4.5',
-    status: 'Approved',
-  },
-  {
-    nursery: 'Bright Minds Academy',
-    date: 'Oct 15, 2025',
-    rating: '⭐ 4.0',
-    status: 'Pending',
-  },
-  {
-    nursery: 'Happy Kids Corner',
-    date: 'Oct 05, 2025',
-    rating: '⭐ 5.0',
-    status: 'Approved',
-  },
-];
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'Approved':
-      return (
-        <Badge className="bg-green-100 text-green-700 hover:bg-green-200">
-          {status}
-        </Badge>
-      );
-    case 'Pending':
-      return (
-        <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200">
-          {status}
-        </Badge>
-      );
-    default:
-      return (
-        <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-200">
-          {status}
-        </Badge>
-      );
-  }
-};
+interface Review {
+  id: string;
+  nurseryId: string;
+  overallRating: number;
+  createdAt: string;
+  isApproved: boolean;
+  isRejected: boolean;
+  nursery: {
+    name: string;
+    slug: string;
+  };
+}
 
 const MyReviews = () => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMyReviews();
+  }, []);
+
+  const fetchMyReviews = async () => {
+    try {
+      setLoading(true);
+      
+      console.log('🔍 Fetching my reviews...');
+      console.log('   Access Token:', localStorage.getItem('accessToken')?.substring(0, 20) + '...');
+      console.log('   User:', JSON.parse(localStorage.getItem('user') || '{}'));
+      
+      const response = await apiClient.get<Review[]>('/reviews/my-reviews', true);
+      
+      console.log('📊 API Response:', response);
+      console.log('   Success:', response.success);
+      console.log('   Data:', response.data);
+      console.log('   Reviews count:', response.data?.length || 0);
+      
+      if (response.success && response.data) {
+        setReviews(response.data);
+        console.log('✅ Reviews loaded:', response.data.length);
+      } else {
+        console.log('❌ No reviews data in response');
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to fetch reviews:', error);
+      console.error('   Error details:', error.message, error.response);
+      toast.error('Failed to load reviews');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const getStatusBadge = (review: Review) => {
+    if (review.isRejected) {
+      return (
+        <Badge className="bg-red-100 text-red-700 hover:bg-red-200">
+          Rejected
+        </Badge>
+      );
+    }
+    if (review.isApproved) {
+      return (
+        <Badge className="bg-green-100 text-green-700 hover:bg-green-200">
+          Approved
+        </Badge>
+      );
+    }
+    return (
+      <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200">
+        Pending
+      </Badge>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your reviews...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="">
       {/* Heading */}
@@ -80,17 +125,30 @@ const MyReviews = () => {
           </thead>
 
           <tbody>
-            {reviews.map((review, index) => (
-              <tr
-                key={index}
-                className="border-t hover:bg-gray-50 transition-colors"
-              >
-                <td className="px-6 py-4">{review.nursery}</td>
-                <td className="px-6 py-4">{review.date}</td>
-                <td className="px-6 py-4">{review.rating}</td>
-                <td className="px-6 py-4">{getStatusBadge(review.status)}</td>
+            {reviews.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">
+                  No reviews yet. Start by reviewing a nursery!
+                </td>
               </tr>
-            ))}
+            ) : (
+              reviews.map((review) => (
+                <tr
+                  key={review.id}
+                  className="border-t hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4 font-medium">{review.nursery.name}</td>
+                  <td className="px-6 py-4">{formatDate(review.createdAt)}</td>
+                  <td className="px-6 py-4">
+                    <span className="flex items-center gap-1">
+                      {'⭐'.repeat(Math.round(review.overallRating))}
+                      <span className="ml-1 text-sm text-gray-600">({review.overallRating.toFixed(1)})</span>
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">{getStatusBadge(review)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

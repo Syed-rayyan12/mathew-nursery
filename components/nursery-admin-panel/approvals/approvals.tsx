@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,63 +13,81 @@ import {
 import { Search, Filter } from "lucide-react";
 import ApprovalTable from "./approval-table.tsx/approval-table";
 import ApprovalViewModal from "./approval-view-modal/approval-view-modal";
-
-// ✅ New table and modal imports renamed
+import { adminService, AdminUser } from "@/lib/api/admin";
+import { toast } from "sonner";
 
 
 export default function ManageApprovals() {
-    // ✅ dummy approvals
-    const [approvals, setApprovals] = useState<any[]>([
-        {
-            id: "a001",
-            user: "John Doe",
-            nursery: "Happy Kids Nursery",
-            rating: 4.5,
-            status: "approved",
-            date: "2025-02-10",
-            message: "Great environment and friendly staff."
-        },
-        {
-            id: "a002",
-            user: "Sarah Williams",
-            nursery: "Little Sunshine Nursery",
-            rating: 3.0,
-            status: "pending",
-            date: "2025-02-11",
-            message: "Good place but needs improvement."
-        },
-        {
-            id: "a003",
-            user: "Ali Khan",
-            nursery: "Bright Minds Nursery",
-            rating: 5.0,
-            status: "approved",
-            date: "2025-02-12",
-            message: "Excellent service and clean classrooms!"
-        }
-    ]);
-
+    const [approvals, setApprovals] = useState<AdminUser[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
     const [openViewModal, setOpenViewModal] = useState(false);
-    const [selectedApproval, setSelectedApproval] = useState<any>(null);
+    const [selectedApproval, setSelectedApproval] = useState<AdminUser | null>(null);
+
+    useEffect(() => {
+        fetchPendingApprovals();
+    }, [searchQuery]);
+
+    const fetchPendingApprovals = async () => {
+        try {
+            setLoading(true);
+            const response = await adminService.getPendingApprovals({
+                searchQuery,
+            });
+
+            if (response.success && Array.isArray(response.data)) {
+                setApprovals(response.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch pending approvals:", error);
+            toast.error("Failed to load pending approvals");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // ✅ VIEW handler
-    const handleView = (approval: any) => {
+    const handleView = (approval: AdminUser) => {
         setSelectedApproval(approval);
         setOpenViewModal(true);
     };
 
-    // ✅ Update approval status
-    const handleUpdateStatus = (approvalId: string, newStatus: string) => {
-        setApprovals((prev) =>
-            prev.map((item) =>
-                item.id === approvalId ? { ...item, status: newStatus } : item
-            )
-        );
+    // ✅ Approve user
+    const handleApprove = async () => {
+        if (!selectedApproval) return;
 
-        // update selected approval modal also
-        setSelectedApproval((prev: any) =>
-            prev ? { ...prev, status: newStatus } : null
-        );
+        try {
+            const response = await adminService.approveUser(selectedApproval.id);
+            
+            if (response.success) {
+                toast.success("User approved successfully!");
+                setApprovals(prev => prev.filter(u => u.id !== selectedApproval.id));
+                setOpenViewModal(false);
+                setSelectedApproval(null);
+            }
+        } catch (error) {
+            console.error("Failed to approve user:", error);
+            toast.error("Failed to approve user");
+        }
+    };
+
+    // ✅ Reject user
+    const handleReject = async () => {
+        if (!selectedApproval) return;
+
+        try {
+            const response = await adminService.rejectUser(selectedApproval.id);
+            
+            if (response.success) {
+                toast.success("User rejected successfully!");
+                setApprovals(prev => prev.filter(u => u.id !== selectedApproval.id));
+                setOpenViewModal(false);
+                setSelectedApproval(null);
+            }
+        } catch (error) {
+            console.error("Failed to reject user:", error);
+            toast.error("Failed to reject user");
+        }
     };
 
     return (
@@ -79,7 +97,7 @@ export default function ManageApprovals() {
                 <h2 className="text-secondary font-medium text-[48px] font-heading">
                     <span className="text-foreground">MANAGE</span> Approvals
                 </h2>
-                <p className="text-gray-600">Approve or reject user submissions</p>
+                <p className="text-gray-600">Approve or reject user registrations</p>
             </div>
 
             {/* SEARCH + FILTER */}
@@ -88,34 +106,29 @@ export default function ManageApprovals() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 rounded-sm"
-                        placeholder="Search by user, nursery or rating..."
+                        placeholder="Search by name or email..."
                     />
                 </div>
-
-                <Select>
-                    <SelectTrigger className="w-[150px] flex items-center gap-2 rounded-sm border border-secondary bg-white px-3 py-2 text-sm">
-                        <Filter className="h-4 w-4 pointer-events-none text-secondary" />
-                        <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
 
             {/* TABLE */}
             <div className="shadow-md p-4 bg-white rounded-lg">
-                <h2 className="font-sans font-bold text-xl">All Approvals</h2>
-                <p className="text-gray-500">Manage user submissions requiring approval.</p>
+                <h2 className="font-sans font-bold text-xl">Pending Approvals</h2>
+                <p className="text-gray-500">Review and approve user registrations.</p>
 
-                <ApprovalTable
-                    approvals={approvals}
-                    onView={handleView}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                ) : (
+                    <ApprovalTable
+                        approvals={approvals}
+                        onView={handleView}
+                    />
+                )}
             </div>
 
             {/* ✅ APPROVAL VIEW MODAL */}
@@ -126,16 +139,9 @@ export default function ManageApprovals() {
                     setOpenViewModal(false);
                     setSelectedApproval(null);
                 }}
-                onApprove={() => {
-                    if (!selectedApproval) return;
-                    handleUpdateStatus(selectedApproval.id, "approved");
-                }}
-                onReject={() => {
-                    if (!selectedApproval) return;
-                    handleUpdateStatus(selectedApproval.id, "rejected");
-                }}
+                onApprove={handleApprove}
+                onReject={handleReject}
             />
-
         </div>
     );
 }

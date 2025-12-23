@@ -1,53 +1,104 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-;
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
 import NurseriesTable from "./nurseries-table/nurseries-table";
-import EditNurseriesModal from "./edit-nurseries-modal/edit-nurseries-modal";
+import ViewNurseriesModal from "./view-nurseries-modal/view-nurseries-modal";
 import AddNurseriesModal from "./add-nurseries-modal/add-nurseries-modal";
 import DeleteNurseriesModal from "./delete-nurseries-modal/delete-nurseries-modal";
+import { adminService } from "@/lib/api/admin";
+import { toast } from "sonner";
 
 export default function ManageNurseries() {
   const [nurseries, setNurseries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openViewModal, setOpenViewModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [selectedNursery, setSelectedNursery] = useState<any>(null);
+
+  const fetchNurseries = async () => {
+    try {
+      setLoading(true);
+      const response = await adminService.getAllNurseries({
+        searchQuery,
+        sortBy,
+        sortOrder,
+        status: statusFilter,
+      });
+      
+      if (response.success && response.data) {
+        setNurseries(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch nurseries:', error);
+      toast.error('Failed to load nurseries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNurseries();
+  }, [searchQuery, statusFilter, sortBy, sortOrder]);
 
   // Add Nursery
   const handleAddNursery = (newNursery: any) => {
     setNurseries((prev) => [...prev, newNursery]);
+    fetchNurseries(); // Refresh the list
   };
 
-  // Edit Nursery
-  const handleUpdateNursery = (updatedNursery: any) => {
-    setNurseries((prev) =>
-      prev.map((n) => (n.id === updatedNursery.id ? updatedNursery : n))
-    );
+  // View Nursery
+  const handleView = (nursery: any) => {
+    setSelectedNursery(nursery);
+    setOpenViewModal(true);
   };
 
   // Delete Nursery
-  const handleDeleteNursery = () => {
+  const handleDeleteNursery = async () => {
     if (!selectedNursery) return;
-    setNurseries((prev) => prev.filter((n) => n.id !== selectedNursery.id));
-    setOpenDeleteModal(false);
-    setSelectedNursery(null);
-  };
-
-  const handleEdit = (nursery: any) => {
-    setSelectedNursery(nursery);
-    setOpenEditModal(true);
+    
+    try {
+      const response = await adminService.deleteNursery(selectedNursery.id);
+      
+      if (response.success) {
+        toast.success('Nursery deleted successfully');
+        setNurseries((prev) => prev.filter((n) => n.id !== selectedNursery.id));
+      } else {
+        toast.error(response.message || 'Failed to delete nursery');
+      }
+    } catch (error) {
+      console.error('Delete nursery error:', error);
+      toast.error('An error occurred while deleting the nursery');
+    } finally {
+      setOpenDeleteModal(false);
+      setSelectedNursery(null);
+    }
   };
 
   const handleDelete = (nursery: any) => {
     setSelectedNursery(nursery);
     setOpenDeleteModal(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading nursery...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -74,21 +125,34 @@ export default function ManageNurseries() {
             type="text"
             className="pl-10 rounded-sm"
             placeholder="Search by nursery name, city, or owner..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[150px] flex items-center gap-2 rounded-sm border border-secondary bg-white px-3 py-2 text-sm">
             <Filter className="h-4 w-4 pointer-events-none text-secondary" />
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-
           <SelectContent>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Disabled">Disabled</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="online">Online</SelectItem>
+            <SelectItem value="offline">Offline</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[150px] rounded-sm">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="createdAt">Date</SelectItem>
+            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="city">City</SelectItem>
+            <SelectItem value="owner">Owner</SelectItem>
+          </SelectContent>
+        </Select> */}
       </div>
 
       {/* TABLE */}
@@ -96,7 +160,13 @@ export default function ManageNurseries() {
         <h2 className="font-sans font-bold text-xl">All Nurseries</h2>
         <p className="text-gray-500">Manage and monitor your nurseries effortlessly.</p>
 
-        <NurseriesTable nurseries={nurseries} onEdit={handleEdit} onDelete={handleDelete} />
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+          </div>
+        ) : (
+          <NurseriesTable nurseries={nurseries} onView={handleView} onDelete={handleDelete} />
+        )}
       </div>
 
       {/* MODALS */}
@@ -106,11 +176,13 @@ export default function ManageNurseries() {
         onAdd={handleAddNursery}
       />
 
-      <EditNurseriesModal
-        open={openEditModal}
+      <ViewNurseriesModal
+        open={openViewModal}
         nursery={selectedNursery}
-        onClose={() => setOpenEditModal(false)}
-        onUpdate={handleUpdateNursery}
+        onClose={() => {
+          setOpenViewModal(false);
+          setSelectedNursery(null);
+        }}
       />
 
       <DeleteNurseriesModal

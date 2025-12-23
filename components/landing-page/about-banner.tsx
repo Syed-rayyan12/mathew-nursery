@@ -10,16 +10,19 @@ const AboutBanner = () => {
                 backgroundRepeat: 'no-repeat'
             }}
         >
-            <div className="absolute inset-0 flex pt-30 justify-center">
-                <div className=" w-full px-24 flex flex-col gap-4">
+           
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-full px-24 flex flex-col gap-4">
+
+                     <img src="/images/cloud.png" className=' h-16 object-cover absolute -top-6 left-150' alt="" />
                     {/* Tag Heading */}
                     <p className="text-primary font-medium font-heading text-2xl">ABOUT US</p>
 
                     {/* Heading */}
-                    <h2 className="text-4xl md:text-5xl font-heading font-bold text-white leading-tight">
-                        Helping Families Find the Perfect <span className="text-secondary">Nursery</span>
+                    <h2 className="text-[66px] font-heading font-medium text-white leading-tight">
+                        Helping Families Find the<br/> Perfect <span className="text-secondary">Nursery</span>
                     </h2>
-
+                 
                     {/* Paragraph */}
                     <p className="text-white text-lg leading-relaxed max-w-6xl">
                         Trusted directory connecting families with the best childcare

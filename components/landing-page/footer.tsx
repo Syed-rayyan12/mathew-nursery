@@ -49,7 +49,7 @@ export default function Footer() {
            <ul className="space-y-2 leading-8">
              <li><Link href="/childcare" className="text-white hover:text-gray-300 hover:underline">Help With Childcare Costs</Link></li>
              <li><Link href="/claim" className="text-white hover:text-gray-300 hover:underline">Claim 6-Month Free Listing </Link></li>
-             <li><Link href="/support" className="text-white hover:text-gray-300 hover:underline">Pricing/Subscription Page</Link></li>
+             <li><Link href="/pricing" className="text-white hover:text-gray-300 hover:underline">Pricing/Subscription Page</Link></li>
              <li><Link href="/review" className="text-white hover:text-gray-300 hover:underline">Review</Link></li>
            </ul>
          </div>

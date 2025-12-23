@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -23,6 +23,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { adminService } from "@/lib/api/admin";
+import { Building2, Users, FileText, Clock } from "lucide-react";
 
 const userGrowthData = [
   { month: "Jan", users: 200 },
@@ -58,6 +60,32 @@ const recentActivity = [
 ];
 
 export default function DashboardCharts() {
+  const [stats, setStats] = useState({
+    totalNurseries: 0,
+    totalGroups: 0,
+    totalUsers: 0,
+    totalReviews: 0,
+    rejectedReviews: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await adminService.getStats();
+      if (response.success && response.data) {
+        setStats(response.data as any);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col gap-4">
 
@@ -69,6 +97,64 @@ export default function DashboardCharts() {
       </h2>
           <p className="text-lg opacity-90 text-foreground">Manage your workspace with confidence.</p>
        
+      </div>
+
+      {/* STATS CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Nurseries</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalNurseries}</div>
+            <p className="text-xs text-muted-foreground">Active nurseries</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Groups</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalGroups}</div>
+            <p className="text-xs text-muted-foreground">Parent groups</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">Registered users</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalReviews}</div>
+            <p className="text-xs text-muted-foreground">All reviews</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Rejected Reviews</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.rejectedReviews}</div>
+            <p className="text-xs text-muted-foreground">Admin rejected</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* ROW 1 */}

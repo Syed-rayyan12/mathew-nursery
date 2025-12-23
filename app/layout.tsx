@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "../components/landing-page/header";
 import Footer from "../components/landing-page/footer";
 import MiniNav from "@/components/landing-page/little-nav";
+import { Toaster } from "@/components/ui/sonner";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
@@ -36,6 +37,7 @@ export default function RootLayout({
       >
 
         {children}
+        <Toaster position="top-right" richColors />
        
       </body>
     </html>

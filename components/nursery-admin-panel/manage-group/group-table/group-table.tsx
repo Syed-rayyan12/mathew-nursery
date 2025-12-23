@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 
-export default function UsersTable({ groups = [], onEdit, onDelete, onView }: any) {
+export default function GroupsTable({ groups = [], onView, onDelete }: any) {
   return (
     <div className="w-full mt-4 overflow-x-auto">
       <table className="w-full min-w-[700px]">
@@ -12,9 +12,9 @@ export default function UsersTable({ groups = [], onEdit, onDelete, onView }: an
             <th className="p-3 text-left">Group Name</th>
             <th className="p-3 text-left">Owner</th>
             <th className="p-3 text-left">Email</th>
+            <th className="p-3 text-left">City</th>
             <th className="p-3 text-left">Nurseries</th>
             <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left">Plan</th>
             <th className="p-3 text-left">Action</th>
           </tr>
         </thead>
@@ -31,34 +31,30 @@ export default function UsersTable({ groups = [], onEdit, onDelete, onView }: an
           ) : (
             groups.map((group: any) => (
               <tr key={group.id} className="border-b hover:bg-gray-50">
-                <td className="py-6 px-3 font-bold">{group.groupName}</td>
-                <td className="py-6 px-3 text-gray-500">{group.owner}</td>
-                <td className="py-6 px-3 text-gray-500">{group.email}</td>
-                <td className="py-6 px-3">{group.Nurseries}</td>
+                <td className="py-6 px-3 font-bold">{group.name}</td>
+                <td className="py-6 px-3 text-gray-500">
+                  {group.ownerFirstName} {group.ownerLastName}
+                </td>
+                <td className="py-6 px-3 text-gray-500">{group.ownerEmail}</td>
+                <td className="py-6 px-3 text-gray-500">{group.city || 'N/A'}</td>
+                <td className="py-6 px-3">{group.nurseriesCount || 0}</td>
                 <td className="py-6 px-3">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
-                      group.status === "Active"
+                      group.ownerIsOnline
                         ? "bg-green-100 text-green-700"
-                        : group.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {group.status}
+                    {group.ownerIsOnline ? 'Online' : 'Offline'}
                   </span>
                 </td>
-                <td className="py-6 px-3">{group.plan}</td>
                 <td className="py-6 px-3 flex items-center gap-3">
-                  <button onClick={() => onView?.(group)}>
+                  <button onClick={() => onView?.(group)} title="View Details">
                     <Eye className="w-4 h-4 text-foreground" />
                   </button>
 
-                  <button onClick={() => onEdit(group)}>
-                    <Pencil className="w-4 h-4 text-foreground" />
-                  </button>
-
-                  <button onClick={() => onDelete(group)}>
+                  <button onClick={() => onDelete(group)} title="Delete Group">
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </td>

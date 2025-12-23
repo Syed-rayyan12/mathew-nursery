@@ -105,7 +105,7 @@ const ReviewBlog = () => {
                                 backgroundRepeat: "no-repeat",
                             }}
                         >
-                            <Quote className="absolute bottom-6 right-6 w-10 h-10 text-[#044A55]" />
+                            <Quote className="absolute bottom-24 right-8 w-10 h-10 text-[#044A55] fill-[#044A55]" />
 
                             {/* Image + Name */}
                             <div className="flex gap-4">

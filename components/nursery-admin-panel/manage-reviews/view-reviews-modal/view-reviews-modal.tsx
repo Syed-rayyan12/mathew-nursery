@@ -52,26 +52,40 @@ export default function ViewReviewModal({
           {/* Reviewer */}
           <div>
             <p className="text-sm font-medium text-gray-600">Reviewer</p>
-            <p className="text-md font-semibold">{review.reviewer}</p>
+            <p className="text-md font-semibold">{review.firstName} {review.lastName}</p>
+          </div>
+
+          {/* Email */}
+          <div>
+            <p className="text-sm font-medium text-gray-600">Email</p>
+            <p className="text-md">{review.email}</p>
           </div>
 
           {/* Nursery */}
           <div>
             <p className="text-sm font-medium text-gray-600">Nursery</p>
-            <p className="text-md font-semibold">{review.nursery}</p>
+            <p className="text-md font-semibold">{review.nursery.name}</p>
           </div>
 
           {/* Rating */}
           <div>
             <p className="text-sm font-medium text-gray-600">Rating</p>
-            <p className="text-md font-semibold">{review.rating}</p>
+            <p className="text-md font-semibold">{review.overallRating.toFixed(1)} / 5.0</p>
           </div>
 
           {/* Message */}
           <div>
-            <p className="text-sm font-medium text-gray-600">Message</p>
-            <p className="text-md">{review.message}</p>
+            <p className="text-sm font-medium text-gray-600">Review Content</p>
+            <p className="text-md">{review.content}</p>
           </div>
+
+          {/* Visit Date */}
+          {review.visitDate && (
+            <div>
+              <p className="text-sm font-medium text-gray-600">Visit Date</p>
+              <p className="text-md">{new Date(review.visitDate).toLocaleDateString()}</p>
+            </div>
+          )}
 
           {/* Status */}
           <div>

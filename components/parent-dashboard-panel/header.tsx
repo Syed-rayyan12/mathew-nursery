@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link'; // ✅ Correct import
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,8 +13,80 @@ import {
 import { Bell, ClosedCaption, HatGlassesIcon, Search, X } from 'lucide-react';
 import { Separator } from '@/components/ui/separator'; // ✅ correct import
 import { Button } from '@/components/ui/button';
+import { authService } from '@/lib/api/auth';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const userData = authService.getCurrentUser();
+    if (userData) {
+      setUser(userData);
+    }
+  }, []);
+
+  const getInitials = (firstName?: string, lastName?: string) => {
+    if (!firstName && !lastName) return 'U';
+    const first = firstName?.charAt(0) || '';
+    const last = lastName?.charAt(0) || '';
+    return (first + last).toUpperCase();
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Check if this is admin or regular user
+      const isAdmin = localStorage.getItem('adminRole') === 'ADMIN';
+      
+      if (isAdmin) {
+        // Admin logout - clear admin tokens only
+        localStorage.removeItem('adminAccessToken');
+        localStorage.removeItem('adminRefreshToken');
+        localStorage.removeItem('adminEmail');
+        localStorage.removeItem('adminRole');
+        localStorage.removeItem('adminUser');
+        router.push('/admin-login');
+        return;
+      }
+
+      // Regular user logout - call backend API
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        await fetch('http://localhost:5000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      // Check role BEFORE removing it
+      const role = localStorage.getItem('role');
+      
+      // Clear all tokens and user data (regular users)
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('email');
+      localStorage.removeItem('role');
+      localStorage.removeItem('user');
+      localStorage.removeItem('firstName');
+      localStorage.removeItem('lastName');
+      localStorage.removeItem('phone');
+      localStorage.removeItem('nurseryName');
+      
+      // Redirect based on role
+      if (role === 'ADMIN') {
+        router.push('/admin-login');
+      } else {
+        router.push('/');
+      }
+    }
+  };
+
   return (
     <header className="w-full flex items-center justify-between pr-6 gap-4 rounded-b-3xl mt-6">
       {/* Search */}
@@ -126,43 +198,43 @@ const Header = () => {
             <Avatar className="cursor-pointer size-12 border border-gray-200 shadow-sm">
               <AvatarImage src="" alt="User Avatar" />
               <AvatarFallback className="bg-[#04B0D6] text-white font-medium">
-                JD
+                {user ? getInitials(user.firstName, user.lastName) : 'U'}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
             <div className="p-2">
-              <p className="font-medium">John Doe</p>
-              <p className="text-sm text-muted-foreground">Johndoe123@gmail.com</p>
+              <p className="font-medium">
+                {user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'User'}
+              </p>
+              <p className="text-sm text-muted-foreground">{user?.email || 'No email'}</p>
             </div>
 
             <Separator className="my-2" />
 
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="text-sm text-foreground w-full">
+              <Link href="/parent-dashboard/account-settings" className="text-sm text-foreground w-full">
                 My Profile
               </Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>
-              <Link href="/settings" className="text-sm text-foreground w-full">
+              <Link href="/parent-dashboard/account-settings" className="text-sm text-foreground w-full">
                 Settings
               </Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>
-              <Link href="/support" className="text-sm text-foreground w-full">
+              <Link href="/parent-dashboard/help-support" className="text-sm text-foreground w-full">
                 Support
               </Link>
             </DropdownMenuItem>
 
             <Separator className="my-2" />
 
-            <DropdownMenuItem asChild>
-              <Link href="/logout" className="text-sm text-red-500 w-full">
-                Logout
-              </Link>
+            <DropdownMenuItem onClick={handleLogout} className="text-sm text-red-500 w-full cursor-pointer">
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

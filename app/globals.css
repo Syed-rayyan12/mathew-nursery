@@ -124,3 +124,37 @@
     font-family: var(--font-bebas-neue), sans-serif;
   }
 }
+
+/* Swiper Navigation Buttons */
+.nursery-slider .swiper-button-next,
+.nursery-slider .swiper-button-prev {
+  display: none;
+}
+
+.nursery-slider .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: #044A55;
+  opacity: 0.5;
+}
+
+.nursery-slider .swiper-pagination-bullet-active {
+  opacity: 1;
+  background: #044A55;
+}
+
+/* Error message fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}

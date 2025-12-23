@@ -10,7 +10,7 @@ const page = () => {
   return (
     <>
        <MiniNav />
-            <Header />
+        <Header />
        <NurseryGroupBanner/>
        <NurseryGroup/>
         <Footer />

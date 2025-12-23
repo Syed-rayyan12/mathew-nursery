@@ -1,164 +1,471 @@
-'use client'
+"use client";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { Star, Search } from "lucide-react";
+import { nurseryService } from "@/lib/api/nursery";
+import { useSearchParams } from "next/navigation";
 
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
+interface NurserySearchResult {
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  city: string;
+  postcode: string;
+}
 
-const SubmitReviewForm = () => {
-  const [agreed, setAgreed] = useState(false)
+export default function NurseryReviewForm() {
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedNursery, setSelectedNursery] = useState<NurserySearchResult | null>(null);
+  const [searchResults, setSearchResults] = useState<NurserySearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Check for pre-filled nursery from URL params
+  useEffect(() => {
+    const nurseryId = searchParams.get('nurseryId');
+    const nurseryName = searchParams.get('nurseryName');
+    const nurserySlug = searchParams.get('nurserySlug');
+    const nurseryAddress = searchParams.get('nurseryAddress');
+    const nurseryCity = searchParams.get('nurseryCity');
+    const nurseryPostcode = searchParams.get('nurseryPostcode');
+
+    if (nurseryId && nurseryName) {
+      setSelectedNursery({
+        id: nurseryId,
+        name: nurseryName,
+        slug: nurserySlug || '',
+        address: nurseryAddress || '',
+        city: nurseryCity || '',
+        postcode: nurseryPostcode || '',
+      });
+    }
+  }, [searchParams]);
+
+  // Search nurseries as user types
+  useEffect(() => {
+    const searchNurseries = async () => {
+      if (searchQuery.length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const response = await nurseryService.search(searchQuery);
+        if (response.success && response.data) {
+          const results = Array.isArray(response.data) ? response.data : [];
+          setSearchResults(results);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchNurseries, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  const [form, setForm] = useState({
+    overall: 0,
+    connection: "",
+    date: "",
+    review: "",
+    facilities: 0,
+    learning: 0,
+    resources: 0,
+    care: 0,
+    activities: 0,
+    staff: 0,
+    food: 0,
+    management: 0,
+    cleanliness: 0,
+    safeguarding: 0,
+    value: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    telephone: "",
+    initialsOnly: false,
+  });
+
+  const showDropdown = searchQuery.length >= 2 && searchResults.length > 0;
+
+  const handleSelectNursery = (nursery: NurserySearchResult) => {
+    setSelectedNursery(nursery);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!selectedNursery) {
+      alert('Please select a nursery first');
+      return;
+    }
+
+    // Calculate average rating from all filled ratings
+    const ratings = [
+      form.overall,
+      form.facilities,
+      form.learning,
+      form.resources,
+      form.care,
+      form.activities,
+      form.staff,
+      form.food,
+      form.management,
+      form.cleanliness,
+      form.safeguarding,
+      form.value,
+    ].filter(rating => rating > 0); // Only count ratings that were given
+
+    if (ratings.length === 0) {
+      alert('Please provide at least one rating');
+      return;
+    }
+
+    // Calculate average: sum of all ratings / number of ratings given
+    const totalRating = ratings.reduce((sum, rating) => sum + rating, 0);
+    const averageRating = Math.round((totalRating / ratings.length) * 10) / 10; // Round to 1 decimal
+
+    console.log('📊 Rating Calculation:');
+    console.log('Total ratings given:', ratings.length);
+    console.log('Sum of ratings:', totalRating);
+    console.log('Average rating:', averageRating);
+
+    try {
+      const { reviewService } = await import('@/lib/api/nursery');
+      
+      // Get logged-in user data
+      const loggedInUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+      const userData = loggedInUser ? JSON.parse(loggedInUser) : null;
+      
+      // Use logged-in user's data if available, otherwise use form data
+      const submissionData = {
+        nurseryId: selectedNursery.id,
+        overallRating: averageRating,
+        content: form.review,
+        connection: form.connection,
+        visitDate: form.date || undefined,
+        facilities: form.facilities || undefined,
+        learning: form.learning || undefined,
+        resources: form.resources || undefined,
+        care: form.care || undefined,
+        activities: form.activities || undefined,
+        staff: form.staff || undefined,
+        food: form.food || undefined,
+        management: form.management || undefined,
+        cleanliness: form.cleanliness || undefined,
+        safeguarding: form.safeguarding || undefined,
+        value: form.value || undefined,
+        firstName: userData?.firstName || form.firstName,
+        lastName: userData?.lastName || form.lastName,
+        email: userData?.email || form.email || form.firstName + '@review.com', // Use actual email if logged in
+        telephone: undefined,
+        initialsOnly: form.initialsOnly,
+      };
+      
+      console.log('📝 Submitting review:', {
+        email: submissionData.email,
+        userId: userData?.id || 'Not logged in'
+      });
+      
+      const response = await reviewService.submit(submissionData);
+
+      if (response.success) {
+        console.log('✅ Review submitted successfully:', response.data);
+        alert(`Thank you! Your review has been submitted successfully with an average rating of ${averageRating} stars.`);
+        // Reset form
+        setForm({
+          overall: 0,
+          connection: "",
+          date: "",
+          review: "",
+          facilities: 0,
+          learning: 0,
+          resources: 0,
+          care: 0,
+          activities: 0,
+          staff: 0,
+          food: 0,
+          management: 0,
+          cleanliness: 0,
+          safeguarding: 0,
+          value: 0,
+          firstName: "",
+          lastName: "",
+          email: "",
+          telephone: "",
+          initialsOnly: false,
+        });
+        setSelectedNursery(null);
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
+    }
+  };
+
+  const StarRating = ({ label, name }: { label: string; name: keyof typeof form }) => {
+    const value = form[name];
+    const rating = typeof value === 'number' ? value : 0;
+
+    const getRatingStatus = (rating: number): string => {
+      switch (rating) {
+        case 1:
+          return "Very Poor";
+        case 2:
+          return "Poor";
+        case 3:
+          return "Satisfactory";
+        case 4:
+          return "Good";
+        case 5:
+          return "Excellent";
+        default:
+          return "";
+      }
+    };
+
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
+          <label className="font-medium min-w-fit">{label}</label>
+          <div className="flex items-center gap-3">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={26}
+                className={`cursor-pointer transition ${rating >= star ? "fill-primary text-primary" : "text-gray-400"
+                  }`}
+                onClick={() => setForm({ ...form, [name]: star })}
+              />
+            ))}
+             {rating > 0 && (
+            <span className="text-sm font-medium text-secondary">
+              {getRatingStatus(rating)}
+            </span>
+          )}
+          </div>
+         
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className='bg-white shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]'>
-    <div className="w-full max-w-4xl mx-auto py-10 px-6 ">
-      <div className="flex flex-col gap-6">
-        {/* Review Form Card */}
-        <div className="bg-white p-6 shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px] p-6">
-        
+    <div className="max-w-6xl mx-auto p-8">
+      <motion.h1
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-3xl font-medium mb-6"
+      >
+        Submit a Review
+      </motion.h1>
+
+      {/* Search Section */}
+      <Card className="rounded-2xl shadow-md mb-6">
+        <CardContent className="p-6">
+          <h2 className="text-2xl font-medium mb-2">Search for a Nursery</h2>
           
-          <form className="space-y-4 ">
-            {/* Select Nursery */}
-            <div className="space-y-2">
-              <Label htmlFor="nursery" className="text-[22px] font-heading font-medium">
-                Select Nursery
-              </Label>
-              <select
-                id="nursery"
-                className="w-full px-4 py-2 border h-12 border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-secondary bg-white"
-              >
-                <option value="">Choose a nursery...</option>
-                <option value="sunshine">Sunshine Nursery</option>
-                <option value="bright-beginnings">Bright Beginnings</option>
-                <option value="little-stars">Little Stars Nursery</option>
-              </select>
+          {/* Show selected nursery */}
+          {selectedNursery ? (
+            <div className="border border-secondary rounded-lg p-4 bg-secondary/5">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-lg text-gray-800">{selectedNursery.name}</p>
+                  <p className="text-gray-600 text-sm mt-1">{selectedNursery.address} {selectedNursery.city}</p>
+                  <p className="text-gray-500 text-sm">{selectedNursery.postcode}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedNursery(null)}
+                  className="text-sm"
+                >
+                  Change Nursery
+                </Button>
+              </div>
             </div>
-
-            {/* Overall Rating */}
-            <div className="space-y-2">
-              <Label htmlFor="rating" className="text-[22px] font-heading font-medium">
-                Overall Rating <span className="text-red-500">*</span>
-              </Label>
-              <select
-                id="rating"
-                required
-                className="w-full px-4 py-2 border h-12 border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-secondary bg-white"
-              >
-                <option value="">Select rating...</option>
-                <option value="5">5 Stars - Excellent</option>
-                <option value="4">4 Stars - Very Good</option>
-                <option value="3">3 Stars - Good</option>
-                <option value="2">2 Stars - Fair</option>
-                <option value="1">1 Star - Poor</option>
-              </select>
-            </div>
-
-            {/* Review Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-[22px] font-heading font-medium">
-                Review Title <span className="text-red-500">*</span>
-              </Label>
+          ) : (
+            <div className="relative">
               <Input
-                id="title"
                 type="text"
-                required
-                placeholder="Summarize your experience"
-                className="w-full h-12"
+                placeholder="Search by nursery name, postcode, or city..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
               />
+              
+              {isSearching && searchQuery.length >= 2 && (
+                <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                  <p className="text-gray-500 text-sm">Searching...</p>
+                </div>
+              )}
+              
+              {/* Dropdown Search Results */}
+              {showDropdown && !isSearching && (
+                <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                  {searchResults.map((nursery) => (
+                    <div
+                      key={nursery.id}
+                      className="p-4 hover:bg-gray-50 cursor-pointer transition border-b last:border-b-0"
+                      onClick={() => handleSelectNursery(nursery)}
+                    >
+                      <p className="font-medium text-gray-800">{nursery.name}</p>
+                      <p className="text-gray-600 text-sm">{nursery.address}, {nursery.city}</p>
+                      <p className="text-gray-500 text-sm">{nursery.postcode}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+                <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                  <p className="text-gray-500 text-sm">No nurseries found</p>
+                </div>
+              )}
+
+              {!searchQuery && (
+                <p className="text-gray-500 text-sm mt-2">Start typing to search for a nursery (minimum 2 characters)</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Review Form - Only show if nursery is selected */}
+      {!selectedNursery ? (
+        <Card className="rounded-2xl shadow-md">
+          <CardContent className="p-6 text-center py-12">
+            <p className="text-gray-500 text-lg">Please search and select a nursery above to submit a review</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="rounded-2xl shadow-md">
+          <CardContent className="p-6 space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+
+            <StarRating label="Overall Experience" name="overall" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="font-medium">Connection to Nursery</label>
+                <select
+                  name="connection"
+                  value={form.connection}
+                  onChange={handleChange}
+                  className="border p-2 rounded-xl w-full"
+                >
+                  <option value="">Please Select...</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Guardian">Guardian</option>
+                  <option value="Carer">Carer</option>
+                </select>
+              </div>
+              <div>
+                <label className="font-medium">Review Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleChange}
+                  className="border p-2 rounded-xl w-full"
+                />
+              </div>
             </div>
 
-            {/* Your Review */}
-            <div className="space-y-2">
-              <Label htmlFor="review" className="text-[22px] font-heading font-medium">
-                Your Review <span className="text-red-500">*</span>
-              </Label>
-              <Textarea
-                id="review"
-                required
-                placeholder="Share your experience with this nursery..."
-                className="w-full h-12 min-h-[150px]"
-              />
+            <div className="flex flex-col gap-2">
+              <label className="font-medium">Write your review</label>
+              <textarea
+                name="review"
+                value={form.review}
+                onChange={handleChange}
+                className="border p-3 rounded-xl min-h-[150px]"
+                placeholder="Please tell us about your experience (200–1000 characters)"
+              ></textarea>
             </div>
 
-            {/* Your Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-[22px] font-heading font-medium">
-                Your Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                required
-                placeholder="Enter your name"
-                className="w-full h-12"
-              />
+            <div className="border rounded-md p-6">
+              <h2 className="font-medium text-2xl mb-6">How would you rate your Overall Experience with this Nursery?</h2>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <StarRating label="Facilities / Outside Space" name="facilities" />
+                  <StarRating label="Learning" name="learning" />
+                  <StarRating label="Resources / Equipment / ICT" name="resources" />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <StarRating label="Care" name="care" />
+                  <StarRating label="Activities" name="activities" />
+                  <StarRating label="Staff" name="staff" />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <StarRating label="Food / Nutrition" name="food" />
+                  <StarRating label="Management" name="management" />
+                  <StarRating label="Cleanliness" name="cleanliness" />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <StarRating label="Safeguarding" name="safeguarding" />
+                  <StarRating label="Value for Money" name="value" />
+                </div>
+              </div>
             </div>
 
-            {/* Email Address */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[22px] font-heading font-medium">
-                Email Address <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                placeholder="Enter your email"
-                className="w-full h-12"
-              />
+            <div className="space-y-3 border p-4 rounded-md">
+              <h2 className="text-xl font-medium">Your Name</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="firstName"
+                  onChange={handleChange}
+                  placeholder="First Name"
+                  className="border p-2 rounded-xl"
+                />
+                <input
+                  type="text"
+                  name="lastName"
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="border p-2 rounded-xl"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="initialsOnly"
+                  checked={form.initialsOnly}
+                  onChange={handleChange}
+                />
+                <label>Display only initials</label>
+              </div>
             </div>
 
-            {/* Confirmation Checkbox */}
-            <div className="flex items-start gap-3 pt-4">
-              <Checkbox
-                id="confirm"
-                checked={agreed}
-                onCheckedChange={(checked) => setAgreed(checked as boolean)}
-                className="mt-1"
-              />
-              <Label htmlFor="confirm" className="text-sm leading-relaxed cursor-pointer">
-                I confirm that this review is based on my own experience and is my genuine opinion. I 
-                understand that my review will be publicly visible.
-              </Label>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full bg-secondary hover:bg-secondary/90 text-white py-6 text-lg font-medium mt-6"
-            >
+            <Button type="submit" className="w-full rounded-xl p-3 text-lg">
               Submit Review
             </Button>
           </form>
-        </div>
-
-        {/* Review Guidelines Card */}
-        <div className="bg-white shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] mt-8 rounded-[6px] p-6">
-          <h2 className="text-2xl font-heading font-medium mb-4">Review Guidelines</h2>
-          <ul className="space-y-3 text-gray-700">
-            <li className="flex items-start gap-3">
-              <span className="text-secondary mt-1">•</span>
-              <span>Be honest and constructive in your feedback</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-secondary mt-1">•</span>
-              <span>Focus on your personal experience with the nursery</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-secondary mt-1">•</span>
-              <span>Avoid offensive language or personal attacks</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-secondary mt-1">•</span>
-              <span>Reviews are moderated and may take 24-48 hours to appear</span>
-            </li>
-          </ul>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+      )}
     </div>
-    </div>
-  )
+  );
 }
-
-export default SubmitReviewForm;

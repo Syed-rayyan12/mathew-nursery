@@ -10,7 +10,7 @@ const Sidebar = () => {
   const links = [
    
     { name: 'Management Nurseries', href: '/nursery-dashboard' },
-    { name: 'Photos & Media Gallery', href: '/nursery-dashboard/photos-media-gallery' },
+    // { name: 'Photos & Media Gallery', href: '/nursery-dashboard/photos-media-gallery' },
     { name: 'Reviews Management', href: '/nursery-dashboard/review-management' },
     { name: 'Help & Support', href: '/nursery-dashboard/help-and-support' },
    

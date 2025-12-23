@@ -1,74 +1,93 @@
-import { ArrowRight, Star } from 'lucide-react';
+"use client";
+import { ArrowRight, Star, Search } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react'
-const latestNews = [
-    {
-        title: 'Bright Beginnings Group',
-        rating: 4.5,
-        slug: 'bright-beginnings-group',
-        summary: 'Award-winning early years centre helping children grow with confidence.',
-        image: '/images/nursery-1.png',
-    },
-    {
-        title: 'Little Stars Nurseries',
-         slug: 'little-stars-nurseries',
-        rating: 4.5,
-        summary: 'A warm, nurturing nursery offering early learning and creative play.',
-        image: '/images/nursery-2.png',
-    },
-    {
-        title: 'Rainbow Kids Group',
-         slug: 'Rainbow Kids Group',
-        rating: 4.5,
-        summary: 'Safe, stimulating and family-focused childcare loved by parents.',
-        image: '/images/nursery-3.png',
-    },
+import React, { useState, useEffect } from 'react'
+import { Input } from '@/components/ui/input';
+import { nurseryGroupService, NurseryGroup } from '@/lib/api/nursery-group';
+import { toast } from 'sonner';
 
-];
-
-const slugify = (text: string) => {
-  return text
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-};
 const nurseryGroup = () => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [nurseryGroups, setNurseryGroups] = useState<NurseryGroup[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNurseryGroups = async () => {
+            try {
+                const response = await nurseryGroupService.getAllGroups();
+                if (response.success && Array.isArray(response.data)) {
+                    setNurseryGroups(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching nursery groups:', error);
+                toast.error('Failed to load nursery groups');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNurseryGroups();
+    }, []);
+
+    const filteredGroups = nurseryGroups.filter(group =>
+        group.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <>
             <div className=' px-24  pt-20 pb-60 bg-white'>
-                  <div className='flex items-center gap-4 mb-10 '>
-                        <span className='text-secondary text-[28px] font-semibold'>(03)</span>
+                  <div className='flex items-center justify-between mb-10 '>
+                    <div className='flex items-center gap-4'>
+                        <span className='text-secondary text-[28px] font-semibold'>({filteredGroups.length.toString().padStart(2, '0')})</span>
                         <span className='text-foreground text-[28px] font-semibold'>nursery groups found</span>
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                            type="text"
+                            placeholder="Search nursery groups..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 w-64"
+                        />
+                    </div>
                     </div>
                 <div className="grid grid-cols-3  max-lg:grid-cols-1 max-lg:gap-34  gap-6">
                   
-                    {latestNews.map((news, index) => (
-                        <div
-                            key={index}
-                            className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-80"
-                        >
-
-                            <Link href={`/nursery-group/${news.slug}`}>
-                            <img src={news.image} alt={news.title} className="w-full h-full object-cover rounded-xl" />
-                            </Link>
-                            <div className="absolute top-60 left-0 right-0 px-4 py-6 mx-4 shadow-lg bg-white rounded-lg">
-                                <h3 className="font-heading text-[24px] font-medium text-[#044A55]">{news.title}</h3>
-                                <div className="flex items-center gap-1 mb-2 mt-1">
-                                    {Array.from({ length: 5 }, (_, i) => (
-                                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    ))}
-                                    <span className="text-sm ml-2 text-foreground">{news.rating}/5</span>
-                                </div>
-                                <p className="font-ubuntu text-[14px] text-muted-foreground">{news.summary}</p>
-                               <Link href={`/nursery-group/${news.slug}`}>
-                                <div className='mt-4 flex items-center gap-2 pt-2'>
-                                    <Link href="" className='text-secondary font-heading text-[20px] uppercase'>VIEW ALL BRANCHES</Link>
-                                    <ArrowRight className='text-secondary size-5' />
-                                </div>
-                                </Link>
-                            </div>
+                    {loading ? (
+                        <div className="col-span-3 text-center py-20">
+                            <p className="text-gray-500 text-lg">Loading nursery groups...</p>
                         </div>
-                    ))}
+                    ) : filteredGroups.length > 0 ? (
+                        filteredGroups.map((group) => (
+                            <div
+                                key={group.id}
+                                className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-80"
+                            >
+
+                                <Link href={`/nursery-group/${group.slug}`}>
+                                <img src={group.cardImage || group.logo || '/images/nursery-1.png'} alt={group.name} className="w-full h-full object-cover rounded-xl" />
+                                </Link>
+                                <div className="absolute top-60 left-0 right-0 px-4 py-6 mx-4 shadow-lg bg-white rounded-lg">
+                                    <h3 className="font-heading text-[24px] font-medium text-[#044A55]">{group.name}</h3>
+                                    {group.description && (
+                                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{group.description}</p>
+                                    )}
+               
+                                <Link href={`/nursery-group/${group.slug}`}>
+                                    <div className='mt-4 flex items-center gap-2 pt-2'>
+                                        <span className='text-secondary font-heading text-[20px] uppercase'>VIEW GROUP</span>
+                                        <ArrowRight className='text-secondary size-5' />
+                                    </div>
+                                    </Link>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-3 text-center py-20">
+                            <p className="text-gray-500 text-lg">No nursery groups found matching your search.</p>
+                        </div>
+                    )}
                 </div>
 
             </div>

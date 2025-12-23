@@ -1,10 +1,19 @@
 'use client'
 
-import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Facebook, Twitter, Instagram, Youtube, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { authService } from "@/lib/api/auth";
 
 export default function MiniNav() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(authService.isAuthenticated());
+  }, []);
+
   return (
-    <div className="w-full h-12 border-b  bg-[#04B0D6] dark:bg-gray-900 flex items-center justify-between px-24 text-sm">
+    <div className="w-full h-12 border-b  bg-[#04B0D6] dark:bg-gray-900 flex items-center justify-between px-24 xl:px-24 lg:px-12 max-lg:px-10 text-sm">
       
       {/* LEFT ICONS */}
       <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
@@ -25,11 +34,16 @@ export default function MiniNav() {
 
       {/* RIGHT LINKS */}
       <div className="flex items-center gap-5 text-gray-700 dark:text-gray-200">
-        <span className="cursor-pointer text-white transition">Login</span>
-        <span className="cursor-pointer text-white transition">Register</span>
-        <span className="cursor-pointer text-white transition">Login Nursery</span>
+        {isLoggedIn && (
+          <Link 
+            href="/parent-dashboard" 
+            className="cursor-pointer text-white transition flex items-center gap-2 hover:opacity-80"
+          >
+            <LayoutDashboard size={18} />
+            My Dashboard
+          </Link>
+        )}
       </div>
-
     </div>
   );
 }

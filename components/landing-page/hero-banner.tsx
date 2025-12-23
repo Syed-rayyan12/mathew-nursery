@@ -4,12 +4,12 @@ import { Search } from 'lucide-react'
 const heroBanner = () => {
   return (
     <>
-        <section className="w-full min-h-screen relative flex justify-center"> 
+        <section className="w-full h-[100vh] lg:h-[50vh] xl:h-[100vh] relative flex justify-center"> 
            <img src="/images/hero-banner.png" alt="" className='w-full h-auto object-cover background-center' />
            
            {/* Content Overlay */}
-           <div className="absolute inset-0 flex pt-30">
-             <div className="max-w-4xl w-full px-24">
+           <div className="absolute inset-0 flex  pt-30 px-24">
+             <div className="">
                {/* Heading */}
                <h1 className="text-5xl font-heading font-bold text-white leading-14 mb-4">
                  Find The Perfect <span className='text-[#044a55]'>Nursery</span> For<br/>  Your <span className='text-[#044a55]'>Little One</span>
@@ -37,7 +37,7 @@ const heroBanner = () => {
                  <input 
                    type="text" 
                    placeholder="Enter your location" 
-                   className="px-4 py-3 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 w-64"
+                   className="px-4 py-3 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 w-64 max-sm:w-full max-md:w-full"
                  />
                  
                  {/* Search Button */}

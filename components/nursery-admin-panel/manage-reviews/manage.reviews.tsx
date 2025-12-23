@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,75 +14,102 @@ import { Search, Filter } from "lucide-react";
 import ReviewTable from "./review-table/review-table";
 import DeleteReviewsModal from "./delete-review-modal/delete-review-modal";
 import ViewReviewModal from "./view-reviews-modal/view-reviews-modal";
+import { adminService, AdminReview } from "@/lib/api/admin";
+import { toast } from "sonner";
 
 export default function ManageReviews() {
-    // ✅ dummy reviews
-    const [reviews, setReviews] = useState<any[]>([
-        {
-            id: "r001",
-            reviewer: "John Doe",
-            nursery: "Happy Kids Nursery",
-            rating: 4.5,
-            status: "approved",
-            date: "2025-02-10",
-            message: "Great environment and friendly staff."
-        },
-        {
-            id: "r002",
-            reviewer: "Sarah Williams",
-            nursery: "Little Sunshine Nursery",
-            rating: 3.0,
-            status: "pending",
-            date: "2025-02-11",
-            message: "Good place but needs improvement."
-        },
-        {
-            id: "r003",
-            reviewer: "Ali Khan",
-            nursery: "Bright Minds Nursery",
-            rating: 5.0,
-            status: "approved",
-            date: "2025-02-12",
-            message: "Excellent service and clean classrooms!"
-        }
-    ]);
-
+    const [reviews, setReviews] = useState<AdminReview[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [sortBy, setSortBy] = useState("createdAt");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [openViewModal, setOpenViewModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [selectedReview, setSelectedReview] = useState<any>(null);
+    const [selectedReview, setSelectedReview] = useState<AdminReview | null>(null);
+
+    useEffect(() => {
+        fetchReviews();
+    }, [searchQuery, statusFilter, sortBy, sortOrder]);
+
+    // Debug: Log reviews when they change
+    useEffect(() => {
+        console.log('📊 Reviews updated:', reviews.length, 'reviews');
+        if (reviews.length > 0) {
+            const ids = reviews.map(r => r.id);
+            const uniqueIds = new Set(ids);
+            if (ids.length !== uniqueIds.size) {
+                console.warn('⚠️ DUPLICATE REVIEW IDs DETECTED!');
+                console.log('All IDs:', ids);
+            }
+        }
+    }, [reviews]);
+
+    const fetchReviews = async () => {
+        try {
+            setLoading(true);
+            const response = await adminService.getAllReviews({
+                searchQuery,
+                status: statusFilter,
+                sortBy,
+                sortOrder,
+            });
+
+            if (response.success && Array.isArray(response.data)) {
+                // Deduplicate reviews by ID
+                const uniqueReviews = Array.from(
+                    new Map(response.data.map((review: AdminReview) => [review.id, review])).values()
+                ) as AdminReview[];
+                
+                if (uniqueReviews.length !== response.data.length) {
+                    console.warn('⚠️ Duplicates removed:', response.data.length - uniqueReviews.length);
+                }
+                
+                setReviews(uniqueReviews);
+            }
+        } catch (error) {
+            console.error("Failed to fetch reviews:", error);
+            toast.error("Failed to load reviews");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // ✅ VIEW handler
-    const handleView = (review: any) => {
+    const handleView = (review: AdminReview) => {
         setSelectedReview(review);
         setOpenViewModal(true);
     };
+    
     // ✅ DELETE handler
-    const handleDelete = (review: any) => {
+    const handleDelete = (review: AdminReview) => {
         setSelectedReview(review);
         setOpenDeleteModal(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (!selectedReview) return;
-
-        setReviews((prev) => prev.filter((r) => r.id !== selectedReview.id));
-
-        setSelectedReview(null);
-        setOpenDeleteModal(false);
+        
+        try {
+            const response = await adminService.deleteReview(selectedReview.id);
+            
+            if (response.success) {
+                setReviews((prev) => prev.filter((r) => r.id !== selectedReview.id));
+                setSelectedReview(null);
+                setOpenDeleteModal(false);
+                toast.success("Review deleted successfully");
+            } else {
+                throw new Error("Failed to delete review");
+            }
+        } catch (error) {
+            console.error("Failed to delete review:", error);
+            toast.error("Failed to delete review");
+        }
     };
 
     const handleReviewStatusChange = (reviewId: string, newStatus: string) => {
-        // ✅ Update main table reviews list
-        setReviews((prev) =>
-            prev.map((r) =>
-                r.id === reviewId ? { ...r, status: newStatus } : r
-            )
-        );
-
-        // ✅ Update selected review (so modal doesn't show old status)
-        setSelectedReview((prev: any) =>
-            prev ? { ...prev, status: newStatus } : null
-        );
+        // Refresh reviews after status change
+        fetchReviews();
     };
 
     return (
@@ -94,7 +121,7 @@ export default function ManageReviews() {
                         <h2 className="text-secondary font-medium text-[48px] font-heading">
                             <span className="text-foreground">MANAGE</span> Reviews
                         </h2>
-                        <p className="text-gray-600">View and delete platform reviews</p>
+                        <p className="text-gray-600">View and manage platform reviews</p>
                     </div>
                 </div>
             </div>
@@ -105,18 +132,21 @@ export default function ManageReviews() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 rounded-sm"
-                        placeholder="Search by reviewer, nursery or rating..."
+                        placeholder="Search by reviewer, nursery or email..."
                     />
                 </div>
 
-                <Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[150px] flex items-center gap-2 rounded-sm border border-secondary bg-white px-3 py-2 text-sm">
                         <Filter className="h-4 w-4 pointer-events-none text-secondary" />
                         <SelectValue placeholder="Status" />
                     </SelectTrigger>
 
                     <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
@@ -129,11 +159,17 @@ export default function ManageReviews() {
                 <h2 className="font-sans font-bold text-xl">All Reviews</h2>
                 <p className="text-gray-500">Manage and monitor nursery reviews.</p>
 
-                <ReviewTable
-                    reviews={reviews}
-                    onView={handleView}       // ✅ only view
-                    onDelete={handleDelete}   // ✅ only delete
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                ) : (
+                    <ReviewTable
+                        reviews={reviews}
+                        onView={handleView}
+                        onDelete={handleDelete}
+                    />
+                )}
             </div>
 
             {/* DELETE MODAL */}
@@ -155,7 +191,6 @@ export default function ManageReviews() {
                     handleReviewStatusChange(selectedReview.id, newStatus);
                 }}
             />
-
         </div>
     );
 }

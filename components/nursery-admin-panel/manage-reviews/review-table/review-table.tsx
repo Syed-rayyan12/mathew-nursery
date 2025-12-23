@@ -1,7 +1,14 @@
 import React from "react";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
+import { AdminReview } from "@/lib/api/admin";
 
-export default function ReviewTable({ reviews = [], onView, onDelete }: any) {
+interface ReviewTableProps {
+  reviews: AdminReview[];
+  onView: (review: AdminReview) => void;
+  onDelete: (review: AdminReview) => void;
+}
+
+export default function ReviewTable({ reviews = [], onView, onDelete }: ReviewTableProps) {
   return (
     <div className="w-full mt-4">
       <table className="w-full">
@@ -26,56 +33,56 @@ export default function ReviewTable({ reviews = [], onView, onDelete }: any) {
               <td colSpan={6}>
                 <div className="flex justify-center w-full">
                   <span className="block text-center py-10 text-gray-500">
-                    No Users Found
+                    No Reviews Found
                   </span>
                 </div>
               </td>
             </tr>
           ) : (
-            reviews.map((user: any) => (
-              <tr key={user.id} className="border-b hover:bg-gray-50">
+            reviews.map((review) => (
+              <tr key={review.id} className="border-b hover:bg-gray-50">
                 {/* Reviewer */}
                 <td className="py-6 px-3 font-bold">
-                  {user.reviewer}
+                  {review.firstName} {review.lastName}
                 </td>
 
                 {/* Nursery */}
                 <td className="py-6 px-3 font-bold">
-                  {user.nursery}
+                  {review.nursery.name}
                 </td>
 
                 {/* Rating */}
                 <td className="py-6 px-3 text-gray-500">
-                  {user.rating}
+                  {review.overallRating.toFixed(1)}
                 </td>
 
                 {/* Date */}
                 <td className="py-6 px-3 text-gray-500">
-                  {user.date}
+                  {new Date(review.createdAt).toLocaleDateString()}
                 </td>
 
                 {/* Status */}
                 <td className="py-6 px-3">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      user.status === "Approved"
+                    className={`px-3 py-1 rounded-full text-sm capitalize ${
+                      review.status === "approved"
                         ? "bg-green-100 text-green-700"
-                        : user.status === "Pending"
+                        : review.status === "pending"
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {user.status}
+                    {review.status}
                   </span>
                 </td>
 
                 {/* Action */}
                 <td className="py-6 px-3 flex items-center gap-3">
-                  <button onClick={() => onView(reviews)}>
+                  <button onClick={() => onView(review)}>
                     <Eye className="w-4 h-4 text-foreground" />
-                  </button> 
+                  </button>
 
-                  <button onClick={() => onDelete(user)}>
+                  <button onClick={() => onDelete(review)}>
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </td>

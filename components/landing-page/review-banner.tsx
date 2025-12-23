@@ -4,25 +4,26 @@ import { Search } from 'lucide-react'
 const ReviewBanner = () => {
     return (
         <section className="w-full h-[80vh] relative flex justify-center"
-            style={{ backgroundImage: "url('/images/about-banner.png')",
+            style={{
+                backgroundImage: "url('/images/about-banner.png')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat'
             }}
         >
-            <div className="absolute inset-0 flex pt-40 justify-center">
-                <div className=" w-full px-24 flex flex-col gap-4">
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-full px-24 flex flex-col gap-4">
                     {/* Tag Heading */}
-          
+                    <img src="/images/cloud.png" className=' h-16 object-cover absolute -top-16 left-136' alt="" />
 
                     {/* Heading */}
-                    <h2 className="text-4xl md:text-5xl font-heading font-bold text-white leading-tight">
-                       Share Your Experience <span className="text-secondary">Experience</span>
+                    <h2 className="text-[66px] font-heading font-medium text-white leading-tight">
+                        Share Your <span className="text-secondary">Experience</span>
                     </h2>
 
                     {/* Paragraph */}
                     <p className="text-white text-lg leading-relaxed">
-                      Help other parents by sharing your honest review
+                        Help other parents by sharing your honest review
                     </p>
 
 
@@ -37,7 +38,7 @@ const ReviewBanner = () => {
                         </select>
 
                         {/* Divider */}
-                       
+
 
                         {/* Location Input */}
                         <input

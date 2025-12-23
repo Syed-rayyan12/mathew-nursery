@@ -11,13 +11,13 @@ const TermsAndConditions = () => {
                 backgroundRepeat: 'no-repeat'
             }}
         >
-            <div className="absolute inset-0 flex pt-40 justify-center">
-                <div className=" w-full px-24 flex flex-col gap-4">
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-full px-24 flex flex-col gap-4">
                     {/* Tag Heading */}
 
-
+                    <img src="/images/cloud.png" className='h-16 object-cover absolute -top-14 left-100' alt="" />
                     {/* Heading */}
-                    <h2 className="text-4xl md:text-5xl font-heading font-bold text-white leading-tight">
+                    <h2 className="text-[66px] font-heading font-medium text-white leading-tight">
                         PRIVACY <span className="text-secondary">POLICY</span>
                     </h2>
 
@@ -29,7 +29,7 @@ const TermsAndConditions = () => {
 
 
                     {/* Search Box */}
-                   
+
                 </div>
             </div>
         </section>

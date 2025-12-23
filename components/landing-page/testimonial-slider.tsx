@@ -32,6 +32,33 @@ const testimonials = [
     text: "From the moment we visited, the team made us feel at ease. My son settled in quickly and now looks forward to every day.",
     rating: 5,
     background: "/images/tesimonial-2.png"
+  },
+    {
+    id: 4,
+    image: "/images/person-3.png",
+    name: "Mike Johnson",
+    subName: "Bristol",
+    text: "From the moment we visited, the team made us feel at ease. My son settled in quickly and now looks forward to every day.",
+    rating: 5,
+    background: "/images/tesimonial-2.png"
+  },
+    {
+    id: 5,
+    image: "/images/person-3.png",
+    name: "Mike Johnson",
+    subName: "Bristol",
+    text: "From the moment we visited, the team made us feel at ease. My son settled in quickly and now looks forward to every day.",
+    rating: 5,
+    background: "/images/tesimonial-2.png"
+  },
+    {
+    id: 6,
+    image: "/images/person-3.png",
+    name: "Mike Johnson",
+    subName: "Bristol",
+    text: "From the moment we visited, the team made us feel at ease. My son settled in quickly and now looks forward to every day.",
+    rating: 5,
+    background: "/images/tesimonial-2.png"
   }
 ]
 
@@ -62,7 +89,7 @@ export default function TestimonialSlider() {
         <Carousel setApi={setApi} className="w-full max-w-4xl mx-auto">
           <CarouselContent>
             {testimonials.map((testimonial) => (
-              <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={testimonial.id} className="md:basis-1/3 lg:basis-1/3">
                 <div
                   className="relative px-6 py-14 rounded-lg min-h-[400px] flex flex-col items-center"
                   style={{
@@ -108,7 +135,7 @@ export default function TestimonialSlider() {
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
+              className={`w-3 h-3 rounded-full cursor-pointer transition-colors ${
                 current === index ? 'bg-primary' : 'bg-gray-300'
               }`}
               aria-label={`Go to slide ${index + 1}`}

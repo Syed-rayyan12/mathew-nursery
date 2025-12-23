@@ -22,7 +22,7 @@ const page = () => {
       <Header />
       <HeroBanner />
       <FeaturesSection />
-      <AboutUsSection />
+      {/* <AboutUsSection />
       <NurseryCardsSection />
       <CircleGridSection />
         <FeaturesCardsSection />
@@ -31,7 +31,7 @@ const page = () => {
        <TestimonialSlider />
         <ArticleNews />
         <NewsletterSignup/>
-         <Footer />
+         <Footer /> */}
 
 
     </>

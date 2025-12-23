@@ -10,6 +10,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
+import { AdminUser } from "@/lib/api/admin";
+
+interface ApprovalViewModalProps {
+  approval: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+}
 
 export default function ApprovalViewModal({
   approval,
@@ -17,7 +26,7 @@ export default function ApprovalViewModal({
   onClose,
   onApprove,
   onReject,
-}: any) {
+}: ApprovalViewModalProps) {
   if (!approval) return null;
 
   return (
@@ -25,61 +34,43 @@ export default function ApprovalViewModal({
       <DialogContent className="max-w-lg p-6 rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
-            Approval Details
+            User Approval Details
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
 
-          {/* Type */}
-          <div>
-            <p className="font-medium text-sm text-gray-600">Type</p>
-            <p className="text-lg font-semibold">
-              {approval.type || "Review"}
-            </p>
-          </div>
-
           {/* Name */}
           <div>
             <p className="font-medium text-sm text-gray-600">Name</p>
-            <p className="text-lg font-semibold">{approval.nursery}</p>
+            <p className="text-lg font-semibold">{approval.firstName} {approval.lastName}</p>
           </div>
 
-          {/* Submitted By */}
+          {/* Email */}
           <div>
-            <p className="font-medium text-sm text-gray-600">Submitted By</p>
-            <p className="text-lg font-semibold">{approval.user}</p>
+            <p className="font-medium text-sm text-gray-600">Email</p>
+            <p className="text-lg">{approval.email}</p>
           </div>
 
-          {/* Date */}
+          {/* Phone */}
           <div>
-            <p className="font-medium text-sm text-gray-600">Date</p>
-            <p className="text-lg font-semibold">{approval.date}</p>
+            <p className="font-medium text-sm text-gray-600">Phone</p>
+            <p className="text-lg">{approval.phone || "N/A"}</p>
           </div>
 
-          {/* Status */}
+          {/* Role */}
           <div>
-            <p className="font-medium text-sm text-gray-600">Status</p>
-            <span
-              className={`px-3 py-1 rounded-full text-sm ${
-                approval.status === "approved"
-                  ? "bg-green-100 text-green-700"
-                  : approval.status === "pending"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {approval.status}
+            <p className="font-medium text-sm text-gray-600">Role</p>
+            <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 capitalize">
+              {approval.role.toLowerCase()}
             </span>
           </div>
 
-          {/* Message (if exists) */}
-          {approval.message && (
-            <div>
-              <p className="font-medium text-sm text-gray-600">Message</p>
-              <p className="text-md">{approval.message}</p>
-            </div>
-          )}
+          {/* Date Registered */}
+          <div>
+            <p className="font-medium text-sm text-gray-600">Registered</p>
+            <p className="text-lg">{new Date(approval.createdAt).toLocaleString()}</p>
+          </div>
         </div>
 
         {/* Buttons */}
@@ -97,7 +88,7 @@ export default function ApprovalViewModal({
           {/* Approve */}
           <Button
             onClick={onApprove}
-            className="bg-green-600 text-white rounded-md flex items-center gap-2"
+            className="bg-green-600 text-white rounded-md flex items-center gap-2 hover:bg-green-700"
           >
             <CheckCircle className="w-4 h-4" />
             Approve
@@ -106,7 +97,7 @@ export default function ApprovalViewModal({
           {/* Reject */}
           <Button
             onClick={onReject}
-            className="bg-red-600 text-white rounded-md flex items-center gap-2"
+            className="bg-red-600 text-white rounded-md flex items-center gap-2 hover:bg-red-700"
           >
             <XCircle className="w-4 h-4" />
             Reject

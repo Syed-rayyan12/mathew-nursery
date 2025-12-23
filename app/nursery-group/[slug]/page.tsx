@@ -1,43 +1,90 @@
-import React from "react";
+'use client'
+
+import React, { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Heart, Link, Star } from "lucide-react";
+import { ArrowRight, Heart, Link as LinkIcon, Star } from "lucide-react";
+import Link from "next/link";
 import MiniNav from "@/components/landing-page/little-nav";
 import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
+import { Nursery, nurseryService } from "@/lib/api/nursery";
+import { NurseryGroup, nurseryGroupService } from "@/lib/api/nursery-group";
+import Image from "next/image";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
-const latestNews = [
-  {
-    title: 'Bright Beginnings Group',
-    rating: 4.5,
+export default function NurseryGroupPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
+  const [group, setGroup] = useState<NurseryGroup | null>(null);
+  const [nurseries, setNurseries] = useState<Nursery[]>([]);
+  const [loading, setLoading] = useState(true);
+  const swiperRef = useRef<SwiperType | null>(null);
 
-    summary: 'Award-winning early years centre helping children grow with confidence.',
-    image: '/images/nursery-1.png',
-  },
-  {
-    title: 'Little Stars Nurseries',
+  useEffect(() => {
+    const fetchGroupAndNurseries = async () => {
+      try {
+        console.log('Fetching group with slug:', resolvedParams.slug);
+        
+        // Fetch group details using getGroupBySlug API
+        const groupResponse = await nurseryGroupService.getGroupBySlug(resolvedParams.slug);
+        
+        console.log('Group response:', groupResponse);
+        
+        if (groupResponse.success && groupResponse.data) {
+          setGroup(groupResponse.data);
+          
+          // Fetch all nurseries and filter by groupId
+          const nurseriesResponse = await nurseryService.getAll({ limit: 100 });
+          
+          if (nurseriesResponse.success && Array.isArray(nurseriesResponse.data)) {
+            // Filter nurseries that have this group's ID as their groupId
+            const groupNurseries = nurseriesResponse.data.filter(
+              (nursery: any) => nursery.groupId === groupResponse.data.id
+            );
+            console.log('Child nurseries:', groupNurseries);
+            setNurseries(groupNurseries);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching nursery group:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    rating: 4.5,
-    summary: 'A warm, nurturing nursery offering early learning and creative play.',
-    image: '/images/nursery-2.png',
-  },
-  {
-    title: 'Rainbow Kids Group',
+    fetchGroupAndNurseries();
+  }, [resolvedParams.slug]);
 
-    rating: 4.5,
-    summary: 'Safe, stimulating and family-focused childcare loved by parents.',
-    image: '/images/nursery-3.png',
-  },
+  if (loading) {
+    return (
+      <>
+        <MiniNav />
+        <Header />
+        <div className="w-full mx-auto py-10 px-24 shadow-xl bg-white">
+          <p className="text-center text-gray-500">Loading group...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
-];
+  if (!group) {
+    return (
+      <>
+        <MiniNav />
+        <Header />
+        <div className="w-full mx-auto py-10 px-24 shadow-xl bg-white">
+          <p className="text-center text-gray-500">Nursery not found</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
-const slugify = (text: string) => {
-  return text
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-};
-
-export default function NurseryGroupPage() {
   return (
     <>
       <MiniNav />
@@ -45,41 +92,101 @@ export default function NurseryGroupPage() {
       <div className="w-full mx-auto  py-10 px-24 shadow-xl bg-white">
         {/* HEADER SECTION */}
         <div className="bg-white p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between ">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-[48px] font-bold text-[#1F2937] font-medium">SUNSHINE NURSERY</h2>
-              <p className="text-gray-700 mb-2">White City, Little Shire</p>
-              <div className="flex mb-4">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Star key={i} className="text-yellow-500" size={16} fill="currentColor" />
-                ))}
-                <span className="text-gray-600 ml-2">(4.5)</span>
+              <h2 className="text-[48px] font-bold text-[#1F2937] font-medium">{group.name.toUpperCase()}</h2>
+              {/* <p className="text-gray-700 mb-2">{group.city || ''} {group.postcode || ''}</p>
+              <p className="text-gray-600">{group.phone || ''}</p>
+              <p className="text-gray-600">{group.email || ''}</p> */}
+            </div>
+            <div>
+              <div className="rounded-md overflow-hidden">
+                <Image 
+                  src={group.logo || "/images/group-1.png"} 
+                  alt={`${group.name} logo`}
+                  width={150}
+                  height={150}
+                  className="object-contain"
+                />
               </div>
             </div>
-            <div>
-              <Button className="bg-orange-500 hover:bg-orange-600 rounded-md">
-                <Heart className="" />
-                Add to Shortlist
-              </Button>
-            </div>
           </div>
-          <div className="flex gap-4 justify-center overflow-x-hidden">
-            <img
-              src="/images/group-1.png"
-              className="w-full object-cover"
-            />
-            <img
-              src="/images/group-2.png"
-              className="w-full object-cover"
-            />
-            <img
-              src="/images/group-3.png"
-              className="w-full object-cover"
-            />
-            <img
-              src="/images/group-4.png"
-              className="w-full object-cover"
-            />
+          <div className="flex gap-3 mt-4 justify-end">
+            {/* <button 
+              onClick={() => swiperRef.current?.slidePrev()}
+              className="bg-secondary hover:bg-secondary/90 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => swiperRef.current?.slideNext()}
+              className="bg-secondary hover:bg-secondary/90 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button> */}
+          </div>
+          {/* IMAGES SLIDER */}
+          <div className="mb-6">
+            <Swiper
+              modules={[Navigation, Pagination, Autoplay]}
+              spaceBetween={12}
+              slidesPerView={2}
+              onSwiper={(swiper) => (swiperRef.current = swiper)}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              pagination={{ clickable: true }}
+              className="rounded-lg nursery-slider pb-12"
+              style={{
+                '--swiper-navigation-color': '#ffffff',
+                '--swiper-pagination-color': '#044A55',
+              } as React.CSSProperties}
+            >
+              {group.images && group.images.length > 0 ? (
+                group.images.map((image: string, index: number) => (
+                  <SwiperSlide key={index}>
+                    <img
+                      src={image}
+                      className="h-96 w-full object-cover rounded-lg"
+                      alt={`${group.name} - Image ${index + 1}`}
+                    />
+                  </SwiperSlide>
+                ))
+              ) : (
+                <>
+                  <SwiperSlide>
+                    <img
+                      src={group.cardImage || group.logo || "/images/group-1.png"}
+                      className="h-96 w-full object-cover rounded-lg"
+                      alt={group.name}
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="/images/group-2.png"
+                      className="h-96 w-full object-cover rounded-lg"
+                      alt={`${group.name} - Image 2`}
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="/images/group-3.png"
+                      className="h-96 w-full object-cover rounded-lg"
+                      alt={`${group.name} - Image 3`}
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="/images/group-4.png"
+                      className="h-96 w-full object-cover rounded-lg"
+                      alt={`${group.name} - Image 4`}
+                    />
+                  </SwiperSlide>
+                </>
+              )}
+            </Swiper>
           </div>
         </div>
 
@@ -87,13 +194,10 @@ export default function NurseryGroupPage() {
         <div className="grid grid-cols-3 gap-6">
           {/* LEFT MAIN CONTENT */}
           <div className="col-span-2 bg-white mt-10 px-4 pt-3 pb-20 shadow-[0px_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px]">
-            <h2 className="text-[34px] font-bold text-[#1F2937] font-medium">About Our Group</h2>
+            <h2 className="text-[34px] font-bold text-[#1F2937] font-medium">About {group.name}</h2>
             <p className="font-medium text-[16px] font-sans text-muted-foreground mb-8">
-              Bright Beginnings is an award-winning nursery group with over 15 years of experience in early years education. We operate 8 nurseries across London, each providing exceptional care and learning opportunities for children aged 3 months to 5 years.
-
-
+              {group.aboutUs || 'A trusted nursery group providing quality childcare and early years education.'}
             </p>
-            <p className="font-medium text-[16px] font-sans text-muted-foreground"> Our philosophy is centered on learning through play, fostering curiosity, and building confidence. All our nurseries follow the Early Years Foundation Stage (EYFS) framework while maintaining their own unique character and community feel.</p>
           </div>
 
           {/* RIGHT CONTACT CARD */}
@@ -112,35 +216,48 @@ export default function NurseryGroupPage() {
 
         </div>
 
-        <div className="grid grid-cols-3 pt-20 pb-40 max-lg:grid-cols-1 max-lg:gap-34  gap-6">
+        <div className="pt-20 pb-40">
+          <h2 className="text-[34px] font-bold text-[#1F2937] font-medium mb-8">Our Nurseries</h2>
+          <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-34 gap-6">
+            {nurseries && nurseries.length > 0 ? (
+              nurseries.map((nursery: any) => (
+                <div
+                  key={nursery.id}
+                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-80"
+                >
+                  <Link href={`/products/${nursery.slug}`}>
+                    <img src={nursery.cardImage || nursery.images?.[0] || '/images/nursery-1.png'} alt={nursery.name} className="w-full h-full object-cover rounded-xl" />
+                  </Link>
 
-          {latestNews.map((news, index) => (
-            <div
-              key={index}
-              className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-80"
-            >
+                  <div className="absolute top-60 left-0 right-0 px-4 py-6 mx-4 shadow-lg bg-white rounded-lg">
+                    <h3 className="font-heading text-[24px] font-medium text-[#044A55]">{nursery.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{nursery.city}</p>
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Star 
+                          key={i} 
+                          className={i < Math.round(nursery.averageRating || 0) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"} 
+                          size={16} 
+                        />
+                      ))}
+                      <span className="text-sm ml-2 text-foreground">{nursery.reviewCount || 0} reviews</span>
+                    </div>
 
-
-              <img src={news.image} alt={news.title} className="w-full h-full object-cover rounded-xl" />
-
-              <div className="absolute top-60 left-0 right-0 px-4 py-6 mx-4 shadow-lg bg-white rounded-lg">
-                <h3 className="font-heading text-[24px] font-medium text-[#044A55]">{news.title}</h3>
-                <div className="flex items-center gap-1 mb-2 mt-1">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                  <span className="text-sm ml-2 text-foreground">{news.rating}/5</span>
+                    <Link href={`/profile?slug=${nursery.slug}`}>
+                      <div className='mt-4 flex items-center pt-2'>
+                        <Button className='text-secondary bg-transparent hover:bg-transparent cursor-pointer font-heading text-[20px] uppercase'>View Nursery</Button>
+                        <ArrowRight className='text-secondary size-5' />
+                      </div>
+                    </Link>
+                  </div>
                 </div>
-                <p className="font-ubuntu text-[14px] text-muted-foreground">{news.summary}</p>
-
-                <div className='mt-4 flex items-center  pt-2'>
-                  <Button className='text-secondary bg-transparent hover:bg-transparent cursor-pointer  font-heading text-[20px] uppercase'>View Nursery</Button>
-                  <ArrowRight className='text-secondary size-5' />
-                </div>
-
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-10">
+                <p className="text-gray-500">No nurseries in this group yet.</p>
               </div>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
 
 

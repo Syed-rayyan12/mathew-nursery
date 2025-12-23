@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link'; // ✅ Correct import
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,6 +15,91 @@ import { Separator } from '@/components/ui/separator'; // ✅ correct import
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
+  const [ownerName, setOwnerName] = useState<string>('Nursery Owner');
+  const [nurseryEmail, setNurseryEmail] = useState<string>('');
+  const [initials, setInitials] = useState<string>('NO');
+  const [nurseryCount, setNurseryCount] = useState<number>(0);
+
+  useEffect(() => {
+    // Load nursery data from localStorage
+    const storedEmail = localStorage.getItem('email');
+    
+    if (storedEmail) {
+      setNurseryEmail(storedEmail);
+    }
+
+    // Load user and nursery data
+    const loadUserData = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          // Load nurseries first
+          const { nurseryDashboardService } = await import('@/lib/api/nursery');
+          const nurseriesResponse = await nurseryDashboardService.getMyNursery();
+          
+          if (nurseriesResponse.success && nurseriesResponse.data) {
+            const nurseries = Array.isArray(nurseriesResponse.data) ? nurseriesResponse.data : [nurseriesResponse.data];
+            setNurseryCount(nurseries.length);
+            
+            // Sort nurseries by creation date (oldest first) to ensure consistent order
+            const sortedNurseries = [...nurseries].sort((a, b) => {
+              const dateA = new Date(a.createdAt || 0).getTime();
+              const dateB = new Date(b.createdAt || 0).getTime();
+              return dateA - dateB;
+            });
+            
+            // Use first (oldest) nursery name as the display name - this will be consistent
+            if (sortedNurseries.length > 0 && sortedNurseries[0].name) {
+              const nurseryName = sortedNurseries[0].name;
+              setOwnerName(nurseryName);
+              
+              // Generate initials from nursery name
+              const words = nurseryName.trim().split(/\s+/);
+              const nurseryInitials = words.length >= 2 
+                ? `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase()
+                : nurseryName.substring(0, 2).toUpperCase();
+              setInitials(nurseryInitials);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API to update status
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        await fetch('http://localhost:5000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      // Clear all authentication data
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('email');
+      
+      // Clear browser history and prevent back navigation
+      window.history.go(-(window.history.length - 1));
+      
+      // Use replace to avoid adding to history
+      setTimeout(() => {
+        window.location.replace('/nursery-login');
+      }, 100);
+    }
+  };
+
   return (
     <header className="w-full flex items-center justify-between pr-6 gap-4 rounded-b-3xl mt-6">
       {/* Search */}
@@ -34,7 +119,7 @@ const Header = () => {
             <Button
            
              
-              className="relative rounded-full w-12 h-12  bg-white shadow-sm hover:bg-gray-100"
+              className="relative rounded-full w-12 h-12 bg-white shadow-sm hover:bg-gray-100"
             >
               <Bell className="w-12 h-12 text-gray-700" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -124,45 +209,35 @@ const Header = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="cursor-pointer size-12 border border-gray-200 shadow-sm">
-              <AvatarImage src="" alt="User Avatar" />
+              <AvatarImage src="" alt="Nursery Avatar" />
               <AvatarFallback className="bg-[#04B0D6] text-white font-medium">
-                JD
+                {initials}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
             <div className="p-2">
-              <p className="font-medium">John Doe</p>
-              <p className="text-sm text-muted-foreground">Johndoe123@gmail.com</p>
+              <p className="font-medium">{ownerName}</p>
+              <p className="text-sm text-muted-foreground">{nurseryEmail}</p>
+              <p className="text-xs text-gray-500 mt-1">{nurseryCount} {nurseryCount === 1 ? 'Nursery' : 'Nurseries'}</p>
             </div>
 
             <Separator className="my-2" />
-
-            <DropdownMenuItem asChild>
-              <Link href="/profile" className="text-sm text-foreground w-full">
-                My Profile
-              </Link>
-            </DropdownMenuItem>
-
             <DropdownMenuItem asChild>
               <Link href="/settings" className="text-sm text-foreground w-full">
                 Settings
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem asChild>
-              <Link href="/support" className="text-sm text-foreground w-full">
-                Support
-              </Link>
-            </DropdownMenuItem>
-
+       
             <Separator className="my-2" />
 
-            <DropdownMenuItem asChild>
-              <Link href="/logout" className="text-sm text-red-500 w-full">
-                Logout
-              </Link>
+            <DropdownMenuItem 
+              onClick={handleLogout}
+              className="text-sm text-red-500 w-full cursor-pointer"
+            >
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
