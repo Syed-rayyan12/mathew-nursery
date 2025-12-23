@@ -8,7 +8,7 @@ const heroBanner = () => {
            <img src="/images/hero-banner.png" alt="" className='w-full h-auto object-cover background-center' />
            
            {/* Content Overlay */}
-           <div className="absolute inset-0 flex  pt-30 px-24">
+          <div className="absolute inset-0 flex  pt-30 px-24 max-sm:px-4 max-md:px-8 lg:px-16">
              <div className="">
                {/* Heading */}
                <h1 className="text-5xl font-heading font-bold text-white leading-14 mb-4">
