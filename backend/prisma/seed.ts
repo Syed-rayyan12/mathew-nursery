@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 const Role = {
   ADMIN: 'ADMIN',
@@ -24,7 +24,7 @@ async function main() {
   await prisma.shortlist.deleteMany();
   await prisma.review.deleteMany();
   await prisma.nursery.deleteMany();
-  await prisma.nurseryGroup.deleteMany();
+  await prisma.group.deleteMany();
   await prisma.article.deleteMany();
   await prisma.contactSubmission.deleteMany();
   await prisma.subscription.deleteMany();
@@ -77,12 +77,12 @@ async function main() {
   console.log('👤 Created nursery owner');
 
   // Create nursery group
-  const nurseryGroup = await prisma.nurseryGroup.create({
+  const nurseryGroup = await prisma.group.create({
     data: {
       name: 'Bright Beginnings Group',
       slug: 'bright-beginnings-group',
       description: 'Award-winning nursery group with over 15 years of experience in early years education.',
-      website: 'https://bright-beginnings.com',
+      ownerId: nurseryOwner.id, // Assuming owner is set, but in schema it's required
     },
   });
   console.log('🏢 Created nursery group');
@@ -144,28 +144,31 @@ async function main() {
   // Create articles
   const articles = [
     {
-      title: 'Tips for Choosing the Right Nursery',
+      name: 'Tips for Choosing the Right Nursery',
+      cardHeading: 'Tips for Choosing the Right Nursery',
+      cardParagraph: 'A comprehensive guide to finding the perfect nursery.',
       slug: 'tips-for-choosing-right-nursery',
-      content: 'Discover what really matters when selecting a nursery for your little one...',
-      excerpt: 'A comprehensive guide to finding the perfect nursery.',
+      sections: [{ heading: 'Introduction', paragraph: 'Discover what really matters when selecting a nursery for your little one...' }],
       category: ArticleCategory.CHILDCARE_TIPS,
       isPublished: true,
       publishedAt: new Date(),
     },
     {
-      title: 'Understanding Early Years Funding',
+      name: 'Understanding Early Years Funding',
+      cardHeading: 'Understanding Early Years Funding',
+      cardParagraph: 'Navigate the world of childcare funding.',
       slug: 'understanding-early-years-funding',
-      content: 'Everything you need to know about nursery funding options in the UK...',
-      excerpt: 'Navigate the world of childcare funding.',
+      sections: [{ heading: 'Introduction', paragraph: 'Everything you need to know about nursery funding options in the UK...' }],
       category: ArticleCategory.FUNDING_COSTS,
       isPublished: true,
       publishedAt: new Date(),
     },
     {
-      title: 'Creative Learning Activities for Toddlers',
+      name: 'Creative Learning Activities for Toddlers',
+      cardHeading: 'Creative Learning Activities for Toddlers',
+      cardParagraph: 'Engage your child with these creative activities.',
       slug: 'creative-learning-activities-toddlers',
-      content: 'Fun and educational activities to support your toddler\'s development...',
-      excerpt: 'Engage your child with these creative activities.',
+      sections: [{ heading: 'Introduction', paragraph: 'Fun and educational activities to support your toddler\'s development...' }],
       category: ArticleCategory.ACTIVITIES_LEARNING,
       isPublished: true,
       publishedAt: new Date(),
