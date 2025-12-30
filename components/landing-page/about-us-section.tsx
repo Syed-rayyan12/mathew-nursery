@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button'
 
 const AboutUsSection = () => {
     return (
-        <section className="w-full py-16 px-24 bg-white">
+        <section className="w-full py-16 px-24 max-sm:px-10 lg:px-10 xl:px-24 bg-white">
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-12 items-center">
+                <div className="flex max-lg:flex-col gap-12 items-center">
                     {/* Left side - Image */}
                     <div className="flex-1">
                         <img

@@ -27,7 +27,7 @@ const features = [
 
 const FeaturesCardsSection = () => {
     return (
-        <div className="py-16 px-24 relative bg-white">
+        <div className="py-16 px-24  relative bg-white">
             <div>
                 <div className='text-center'>
                     <p className="text-primary font-medium font-heading text-2xl">Reviews & Awards</p>
@@ -44,7 +44,7 @@ const FeaturesCardsSection = () => {
                                 className="bg-white border border-black/50 rounded-md  transition-shadow duration-300 overflow-hidden p-6"
                             >
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-heading text-[24px] font-medium text-foreground" dangerouslySetInnerHTML={{ __html: feature.title }} />
+                                    <h3 className="font-heading text-[24px]  font-medium text-foreground" dangerouslySetInnerHTML={{ __html: feature.title }} />
                                     <img src={feature.icon} alt="icon" className="w-14 h-auto object-cover" />
                                 </div>
                                 <div className="flex items-center gap-1 mb-2">

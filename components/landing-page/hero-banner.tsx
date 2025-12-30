@@ -4,11 +4,11 @@ import { Search } from 'lucide-react'
 const heroBanner = () => {
   return (
     <>
-        <section className="w-full h-[100vh] lg:h-[50vh] xl:h-[100vh] relative flex justify-center"> 
-           <img src="/images/hero-banner.png" alt="" className='w-full h-auto object-cover background-center' />
+        <section className="w-full h-[100vh] max-lg:h-[50vh] max-sm:h-[90vh] lg:h-[50vh] xl:h-[100%] relative flex justify-center"> 
+           <img src="/images/hero-banner.png" alt="" className='w-full h-full object-cover background-center' />
            
            {/* Content Overlay */}
-          <div className="absolute inset-0 flex  pt-30 px-24 max-sm:px-4 max-md:px-8 lg:px-16">
+          <div className="absolute inset-0 flex  pt-30 max-sm:px-8 max-md:px-14  xl:px-24  max-xl:px-16">
              <div className="">
                {/* Heading */}
                <h1 className="text-5xl font-heading font-bold text-white leading-14 mb-4">

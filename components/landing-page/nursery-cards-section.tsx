@@ -30,7 +30,7 @@ const latestNews = [
 
 const NurseryCardsSection = () => {
     return (
-        <div className="py-16 px-24 relative bg-white">
+        <div className="py-16  relative bg-white">
             <div>
                 <div className='text-center'>
 
@@ -41,8 +41,8 @@ const NurseryCardsSection = () => {
                     <p className='text-[16px] font-ubuntu  mb-9'>Nurturing spaces where little ones grow and glow
                     </p>
                 </div>
-                <div className='mx-auto px-36 max-2xl:px-6 max-sm:px-10 max-lg:px-36 '>
-                    <div className="grid grid-cols-3  max-lg:grid-cols-1 max-lg:gap-34  gap-6">
+                <div className='mx-auto px-24  max-sm:px-10 max-lg:px-36 '>
+                    <div className="grid grid-cols-3  max-lg:grid-cols-1 max-lg:gap-40 max-sm:gap-44  gap-6">
                         {latestNews.map((news, index) => (
                             <div
                                 key={index}
