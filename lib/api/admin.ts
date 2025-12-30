@@ -322,33 +322,27 @@ export const adminService = {
   // Get monthly user statistics
   getMonthlyUserStats: async (months: number = 12) => {
     return adminApiClient.get<{
-      success: boolean;
-      data: {
-        monthlyUsers: Array<{
-          month: string;
-          users: number;
-          _count: number;
-        }>;
-        totalUsers: number;
-      };
+      monthlyUsers: Array<{
+        month: string;
+        users: number;
+        _count: number;
+      }>;
+      totalUsers: number;
     }>(`/admin/analytics/monthly-users?months=${months}`, true);
   },
 
   // Get monthly review statistics
   getMonthlyReviewStats: async (months: number = 12) => {
     return adminApiClient.get<{
-      success: boolean;
-      data: {
-        monthlyReviews: Array<{
-          month: string;
-          reviews: number;
-          approved: number;
-          pending: number;
-          _count: number;
-        }>;
-        totalReviews: number;
-        totalApproved: number;
-      };
+      monthlyReviews: Array<{
+        month: string;
+        reviews: number;
+        approved: number;
+        pending: number;
+        _count: number;
+      }>;
+      totalReviews: number;
+      totalApproved: number;
     }>(`/admin/analytics/monthly-reviews?months=${months}`, true);
   },
 };
