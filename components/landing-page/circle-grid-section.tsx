@@ -15,11 +15,11 @@ const CircleGridSection = () => {
     return (
         <div className=''>
         <div className=" " style={{ backgroundImage: 'url(/images/Vector%207.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-            <div className="px-24 py-16">
-                <div className="grid grid-cols-6 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1">
+            <div className="px-24 py-16 max-sm:px-9">
+                <div className="grid grid-cols-6 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-2">
                     {circles.map((circle, index) => (
                         <div key={index} className="flex justify-center">
-                            <img src={circle} alt={`Circle ${index + 1}`} className="w-34  object-contain rounded-full" />
+                            <img src={circle} alt={`Circle ${index + 1}`} className="w-44  object-contain rounded-full" />
                         </div>
                     ))}
                 </div>

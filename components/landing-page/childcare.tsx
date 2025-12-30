@@ -63,7 +63,7 @@ export default function Childcare() {
   ];
 
   return (
-    <div className=" mx-auto text-center py-14 px-24 bg-white">
+    <div className=" mx-auto text-center py-14 px-24 max-sm:px-4 bg-white">
       {/* Heading */}
       <h2 className="text-[48px] font-medium font-heading">Available Funding Options</h2>
 
@@ -93,7 +93,7 @@ export default function Childcare() {
         ))}
       </div>
 
-      <div className="px-10 mt-20">
+      <div className="px-10 mt-20 max-sm:px-4">
         <h2 className="text-[48px] font-medium font-heading">How to Apply for Funding</h2>
         <p className="text-gray-600 mt-3 max-w-3xl mx-auto">
           Explore all the ways you can reduce your childcare costs through government support and funding schemes.
@@ -102,7 +102,7 @@ export default function Childcare() {
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex items-center gap-4"
+              className="flex max-sm:flex-col max-sm:items-start items-center gap-4"
             >
               {/* Number Icon */}
               <div className="w-12 h-12 flex items-center justify-center rounded-full bg-secondary text-white font-medium text-lg">

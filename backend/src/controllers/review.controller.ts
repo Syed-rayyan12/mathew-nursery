@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import { NotFoundError, BadRequestError } from '../utils';
 import { AuthRequest } from '../middleware';
 import { generateShortId } from '../utils/id-generator';
+import { createNotification } from './notification.controller';
 
 // Submit a review for a nursery (authentication optional)
 export const submitReview = async (
@@ -103,15 +104,40 @@ export const submitReview = async (
       },
     });
 
+    console.log(`📊 Found ${reviews.length} approved reviews for nursery ${nurseryId}`);
+
     // Update nursery review count only (rating is calculated from reviews)
-    await prisma.nursery.update({
+    const updateResult = await prisma.nursery.update({
       where: { id: nurseryId },
       data: {
         reviewCount: reviews.length,
       },
     });
 
-    console.log('✅ Review created successfully:', review.id);
+    console.log(`✅ Updated review count for nursery ${nurseryId}: ${updateResult.reviewCount}`);
+
+    // Create notification for new review
+    try {
+      const notification = await createNotification(
+        'New Review Received',
+        `${firstName} ${lastName} has submitted a review for "${nursery.name}" with ${overallRating} star(s)`,
+        'REVIEW',
+        reviewId
+      );
+      console.log(`🔔 Notification created with ID: ${notification.id}`);
+    } catch (notificationError) {
+      console.error('❌ Failed to create notification:', notificationError);
+    }
+
+    console.log(`✅ Review created successfully:`, {
+      id: review.id,
+      nurseryId: review.nurseryId,
+      firstName: review.firstName,
+      lastName: review.lastName,
+      rating: review.overallRating,
+      isApproved: review.isApproved,
+      createdAt: review.createdAt,
+    });
     
     res.status(201).json({
       success: true,
@@ -210,7 +236,7 @@ export const getUserReviews = async (
 
     console.log('✅ Found reviews:', reviews.length);
     if (reviews.length > 0) {
-      reviews.forEach(r => {
+      reviews.forEach((r: any) => {
         console.log(`   - Review ${r.id}: ${r.nursery.name}, rating: ${r.overallRating}, userId: ${r.userId || 'NULL'}, email: ${r.email}`);
       });
     } else {

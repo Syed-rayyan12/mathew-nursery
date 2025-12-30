@@ -6,12 +6,12 @@ function ShortListed() {
     return (
         <>
             <div>
-                <h2 className='text-secondary font-medium text-[48px] font-heading'><span className='text-foreground'>MY</span> SHORTLIST</h2>
+                <h2 className='text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading'><span className='text-foreground'>MY</span> SHORTLIST</h2>
                 <p>Manage your saved nurseries and compare options</p>
                 <div className='pt-4'>
-                    <Input placeholder='Search your shortlisted nurseries...' className='w-[50%] rounded-md h-9 bg-white' />
+                    <Input placeholder='Search your shortlisted nurseries...' className='w-full md:w-[50%] rounded-md h-9 bg-white' />
                 </div>
-                <div className='flex gap-4'>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4'>
                     <div className=''>
                         <div className='bg-white rounded-md p-3 mt-6 flex flex-col gap-4'>
                             <img src="/images/list 1.png" alt="" />

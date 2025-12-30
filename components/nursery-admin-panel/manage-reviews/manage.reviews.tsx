@@ -116,9 +116,9 @@ export default function ManageReviews() {
         <div className="w-full">
             {/* HEADER */}
             <div className="bg-white p-4 shadow-md rounded-lg mb-4">
-                <div className="flex flex-row justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 className="text-secondary font-medium text-[48px] font-heading">
+                        <h2 className="text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading">
                             <span className="text-foreground">MANAGE</span> Reviews
                         </h2>
                         <p className="text-gray-600">View and manage platform reviews</p>

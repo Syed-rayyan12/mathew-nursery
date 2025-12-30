@@ -123,75 +123,75 @@ export default function ArticleDetailPage() {
             <Header />
             <div className="bg-white">
                 <div
-                    className="bg-cover bg-center bg-no-repeat relative h-[80vh] py-10 mb-260"
+                    className="bg-cover bg-center bg-no-repeat relative h-[80vh] max-md:h-[60vh] max-sm:h-[50vh]"
                     style={{ backgroundImage: `url('${article.slugImage || '/images/detail.png'}')` }}
                 >
-                    <div className="absolute inset-0 shadow-2xl top-100 px-24">
-                        <div className="mx-auto p-6 bg-white shadow-2xl rounded-2xl space-y-6">
-                            <div className="w-30 h-10 rounded-2xl flex justify-center items-center bg-[#D5F7FF]">
-                                <span className="text-sm font-medium text-secondary">{getCategoryLabel(article.category)}</span>
+                </div>
+                <div className="relative px-24 max-lg:px-8 max-sm:px-4 -mt-40 max-sm:-mt-20 mb-20 z-10">
+                    <div className="mx-auto p-6 max-sm:p-4 bg-white shadow-2xl rounded-2xl space-y-6 max-sm:space-y-4">
+                            <div className="w-30 max-sm:w-fit h-10 max-sm:h-8 px-4 rounded-2xl flex justify-center items-center bg-[#D5F7FF]">
+                                <span className="text-sm max-sm:text-xs font-medium text-secondary">{getCategoryLabel(article.category)}</span>
                             </div>
 
-                            <h2 className="text-[59px] font-medium leading-tight">
+                            <h2 className="text-[59px] max-lg:text-5xl max-md:text-4xl max-sm:text-2xl font-medium leading-tight">
                                 {article.cardHeading}
                             </h2>
 
-                            <div className="flex items-center justify-between gap-4 text-sm text-gray-600">
-                                <div className="flex gap-4">
+                            <div className="flex max-sm:flex-col items-center max-sm:items-start justify-between gap-4 max-sm:gap-2 text-sm text-gray-600">
+                                <div className="flex max-sm:flex-col gap-4 max-sm:gap-1">
                                     <span className="font-medium">{article.name}</span>
-                                    <span>•</span>
-                                    <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                    <span className="max-sm:hidden">•</span>
+                                    <span className="max-sm:text-xs">{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                 </div>
-                                <div className="flex items-center">
-                                    <Download className="text-secondary w-6 h-6" />
-                                    <button className="px-4 py-2 bg-transparent text-secondary rounded-lg w-max">Share</button>
+                                <div className="flex items-center max-sm:self-end max-sm:mt-2">
+                                    <Download className="text-secondary w-6 h-6 max-sm:w-5 max-sm:h-5" />
+                                    <button className="px-4 max-sm:px-2 py-2 bg-transparent text-secondary rounded-lg w-max max-sm:text-sm">Share</button>
                                 </div>
                             </div>
 
-                            <section className="space-y-3">
-                                <p>{article.cardParagraph}</p>
+                            <section className="space-y-3 max-sm:space-y-2">
+                                <p className="max-sm:text-sm">{article.cardParagraph}</p>
                             </section>
 
                             {article.sections && article.sections.length > 0 && article.sections.map((section, index) => (
-                                <section key={index} className="space-y-3">
-                                    <h2 className="text-xl font-medium">{section.heading}</h2>
-                                    <p>{section.paragraph}</p>
+                                <section key={index} className="space-y-3 max-sm:space-y-2">
+                                    <h2 className="text-xl max-sm:text-lg font-medium">{section.heading}</h2>
+                                    <p className="max-sm:text-sm">{section.paragraph}</p>
                                 </section>
                             ))}
 
                             {article.listHeading && article.listItems && article.listItems.length > 0 && (
-                                <section className="space-y-3">
-                                    <h2 className="text-xl font-medium">{article.listHeading}</h2>
-                                    <ul className="list-disc pl-6 space-y-1">
+                                <section className="space-y-3 max-sm:space-y-2">
+                                    <h2 className="text-xl max-sm:text-lg font-medium">{article.listHeading}</h2>
+                                    <ul className="list-disc pl-6 max-sm:pl-4 space-y-1">
                                         {article.listItems.map((item, index) => (
-                                            <li key={index}>{item.heading}</li>
+                                            <li key={index} className="max-sm:text-sm">{item.heading}</li>
                                         ))}
                                     </ul>
                                 </section>
                             )}
 
                             {article.tipText && (
-                                <section className="p-4 bg-[#D5F7FF] border rounded-lg shadow-sm">
-                                    <h3 className="font-medium text-lg">Top Tip</h3>
-                                    <p className="mt-1">{article.tipText}</p>
+                                <section className="p-4 max-sm:p-3 bg-[#D5F7FF] border rounded-lg shadow-sm">
+                                    <h3 className="font-medium text-lg max-sm:text-base">Top Tip</h3>
+                                    <p className="mt-1 max-sm:text-sm">{article.tipText}</p>
                                 </section>
                             )}
 
                             {article.finalHeading && article.finalParagraph && (
-                                <section className="space-y-3 pb-6">
-                                    <h2 className="text-xl font-medium">{article.finalHeading}</h2>
-                                    <p>{article.finalParagraph}</p>
+                                <section className="space-y-3 max-sm:space-y-2 pb-6 max-sm:pb-4">
+                                    <h2 className="text-xl max-sm:text-lg font-medium">{article.finalHeading}</h2>
+                                    <p className="max-sm:text-sm">{article.finalParagraph}</p>
                                 </section>
                             )}
                         </div>
                     </div>
                 </div>
-            </div>
 
             {relatedArticles.length > 0 && (
-                <div className="px-24 mt-4">
-                    <h2 className="font-medium fon-sans text-[48px] mb-4">Related Articles</h2>
-                    <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-34 gap-6 mb-60">
+                <div className="px-24 max-lg:px-8 max-sm:px-4 mt-4">
+                    <h2 className="font-medium fon-sans text-[48px] max-md:text-4xl max-sm:text-3xl mb-4">Related Articles</h2>
+                    <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-34 gap-6 mb-60 max-sm:mb-20">
                         {relatedArticles.map((relatedArticle) => (
                             <div
                                 key={relatedArticle.id}

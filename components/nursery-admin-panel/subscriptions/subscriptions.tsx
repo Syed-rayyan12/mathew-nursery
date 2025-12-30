@@ -16,6 +16,12 @@ import {
 export default function Subscriptions() {
   const [tab, setTab] = useState("all");
 
+  const tabOptions = [
+    { value: "all", label: "Active Subscription" },
+    { value: "unread", label: "Invoice History" },
+    { value: "read", label: "Plans & Pricing" },
+  ];
+
   const handleStatusChange = (id: number, value: string) => {
     console.log(`Status for ID ${id} changed to ${value}`);
   };
@@ -50,49 +56,59 @@ export default function Subscriptions() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* ✅ Header */}
-      <div className="bg-white rounded-lg flex justify-between items-center gap-4">
+      <div className="bg-white rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="px-6 py-4">
-          <h2 className="text-secondary font-medium text-[48px] font-heading">
+          <h2 className="text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading">
             <span className="text-foreground">SUBSCRIPTIONS</span> & BILLING
           </h2>
           <p>Manage plans, invoices, and payments</p>
         </div>
 
-        <div className="flex items-center gap-3 pr-3">
+        <div className="flex items-center gap-3 pr-3 w-full md:w-auto">
           <button
             className="flex items-center gap-2 cursor-pointer
-      px-4 py-2 rounded-md bg-secondary text-white hover:bg-red-700 transition"
+      px-4 py-2 rounded-md bg-secondary text-white hover:bg-red-700 transition w-full md:w-auto"
           >
             Generate Coupon
           </button>
         </div>
       </div>
 
-      {/* ✅ Tabs */}
+      {/* ✅ Tabs/Select */}
       <Card>
         <CardContent>
-          <Tabs value={tab} onValueChange={setTab} className="w-full">
-            <TabsList className="grid grid-cols-3 w-1/2 gap-2 bg-[#EFEFEF]">
-              <TabsTrigger
-                value="all"
-                className="rounded-sm text-gray-500 data-[state=active]:bg-white data-[state=active]:text-foreground"
-              >
-                Active Subscription
-              </TabsTrigger>
-              <TabsTrigger
-                value="unread"
-                className="rounded-sm text-gray-500 data-[state=active]:bg-white data-[state=active]:text-foreground"
-              >
-                Invoice History
-              </TabsTrigger>
-              <TabsTrigger
-                value="read"
-                className="rounded-sm text-gray-500 data-[state=active]:bg-white data-[state=active]:text-foreground"
-              >
-                Plans & Pricing
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Mobile/Tablet: Select Dropdown */}
+          <div className="block lg:hidden">
+            <Select value={tab} onValueChange={setTab}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select section" />
+              </SelectTrigger>
+              <SelectContent>
+                {tabOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop: Tabs */}
+          <div className="hidden lg:block">
+            <Tabs value={tab} onValueChange={setTab} className="w-full">
+              <TabsList className="grid grid-cols-3 w-full gap-2 bg-[#EFEFEF]">
+                {tabOptions.map((option) => (
+                  <TabsTrigger
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-sm text-gray-500 data-[state=active]:bg-white data-[state=active]:text-foreground"
+                  >
+                    {option.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
         </CardContent>
       </Card>
 
@@ -103,7 +119,8 @@ export default function Subscriptions() {
             <CardTitle>Active Subscriptions</CardTitle>
           </CardHeader>
           <CardContent>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="bg-[#F8F8F8] border-2 border-gray-300 h-14">
                   <th className="p-3 text-left rounded-l-md">Group</th>
@@ -141,6 +158,7 @@ export default function Subscriptions() {
                 ))}
               </tbody>
             </table>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -152,7 +170,8 @@ export default function Subscriptions() {
             <CardTitle>Invoice History</CardTitle>
           </CardHeader>
           <CardContent>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[500px]">
               <thead>
                 <tr className="bg-[#F8F8F8] border-2 border-gray-300 h-14">
                   <th className="p-3 text-left rounded-l-md">Group</th>
@@ -179,6 +198,7 @@ export default function Subscriptions() {
                 ))}
               </tbody>
             </table>
+            </div>
           </CardContent>
         </Card>
       )}

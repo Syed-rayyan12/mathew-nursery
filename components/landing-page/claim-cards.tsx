@@ -34,7 +34,7 @@ const claimCards = [
 const ClaimCards = () => {
     return (
         <>
-            <div className='text-center pt-10 pb-14 px-24 bg-white'>
+            <div className='text-center pt-10 pb-14 px-24 max-sm:px-4 max-md:px-8 bg-white'>
                 <h2 className="text-[48px] font-medium font-heading">Why List Your Nursery With Us?</h2>
 
                 {/* Paragraph 2 lines */}
@@ -43,7 +43,7 @@ const ClaimCards = () => {
                 </p>
 
                 {/* Cards Grid */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4  gap-6 mt-12">
                     {claimCards.map((card, index) => (
                         <div
                             key={index}
@@ -63,14 +63,14 @@ const ClaimCards = () => {
                     ))}
                 </div>
 
-                <div className='mt-10 mb-10 px-26'>
+                <div className='mt-10 mb-10 px-26 max-sm:px-4 max-lg:px-4'>
                     <h2 className="text-[48px] font-medium font-heading">How It Works</h2>
 
                     {/* Paragraph 2 lines */}
                     <p className="text-gray-600  max-w-3xl mx-auto">
                         Get listed in four simple steps.
                     </p>
-                    <div className='flex justify-between mt-12'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-12 mb-12'>
                         <div className='text-center flex flex-col justify-center items-center gap-3 '>
                             <div className="w-12 h-12 flex items-center justify-center rounded-full bg-secondary text-2xl">
                                 <span className='text-white'>1</span>
@@ -108,10 +108,10 @@ const ClaimCards = () => {
 
                     {/* Paragraph 2 lines */}
 
-                    <p className="text-gray-600 mt-3 max-w-3xl mx-auto">
+                    <p className="text-gray-600 mt-3 max-w-3xl  mx-auto">
                         Fill in your details and we'll get you set up.
                     </p>
-                    <div className='bg-white mt-10 shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-lg p-8 mx-26'>
+                    <div className='bg-white mt-10 shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-lg p-8 px-26 max-sm:px-4 lg:px-4 max-lg:px-4'>
                         <form className="space-y-8">
                             {/* Select Nursery */}
 
@@ -143,7 +143,7 @@ const ClaimCards = () => {
                                 />
                             </div>
 
-                            <div className="space-y-2 flex items-center w-full gap-4">
+                            <div className="space-y-2 flex items-center max-sm:flex-col w-full gap-4">
                                 <div className='w-full'>
 
                                     <Label htmlFor="email" className="text-[20px] text-muted-foreground font-sans font-medium">
@@ -172,7 +172,7 @@ const ClaimCards = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 flex items-center w-full gap-4">
+                            <div className="space-y-2 flex items-center max-sm:flex-col w-full gap-4">
                                 <div className='w-full'>
 
                                     <Label htmlFor="postcode" className="text-[20px] text-muted-foreground font-sans font-medium">

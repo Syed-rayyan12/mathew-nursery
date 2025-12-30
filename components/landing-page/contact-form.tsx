@@ -8,13 +8,13 @@ import { Textarea } from '@/components/ui/textarea'
 
 const ContactSection = () => {
   return (
-    <div className="w-full  mx-auto py-16 px-24 bg-white">
+    <div className="w-full  mx-auto py-16 max-sm:px-8 px-24 bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Side - Contact Info */}
         <div className="space-y-8 border border-secondary p-4 rounded-[6px]">
           {/* Reach Out to Us */}
           <div className=''>
-            <h2 className="text-4xl font-heading font-bold ">Reach Out to Us</h2>
+            <h2 className="text-4xl font-heading font-bold max-sm:font-medium">Reach Out to Us</h2>
              <p className='text-[16px] font-medium font-sans mb-6'>We’re here to assist with any questions, 
 Connect with our team today</p>
             <div className="space-y-4">
@@ -52,7 +52,7 @@ Connect with our team today</p>
           </div>
       
           <div>
-            <h3 className="text-2xl font-heading font-bold mb-4">Follow Us</h3>
+            <h3 className="text-2xl font-heading font-bold max-sm:font-medium mb-4">Follow Us</h3>
             <div className="flex gap-4">
               <a
                 href="#"

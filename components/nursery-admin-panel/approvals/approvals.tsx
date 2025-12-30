@@ -94,7 +94,7 @@ export default function ManageApprovals() {
         <div className="w-full">
             {/* HEADER */}
             <div className="bg-white p-4 shadow-md rounded-lg mb-4">
-                <h2 className="text-secondary font-medium text-[48px] font-heading">
+                <h2 className="text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading">
                     <span className="text-foreground">MANAGE</span> Approvals
                 </h2>
                 <p className="text-gray-600">Approve or reject user registrations</p>

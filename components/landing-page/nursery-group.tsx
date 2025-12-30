@@ -35,8 +35,8 @@ const nurseryGroup = () => {
 
     return (
         <>
-            <div className=' px-24  pt-20 pb-60 bg-white'>
-                  <div className='flex items-center justify-between mb-10 '>
+            <div className=' px-24 max-sm:px-6  pt-20 pb-60 bg-white'>
+                  <div className='flex items-center justify-between mb-10 max-sm:flex-col max-sm:items-start gap-4'>
                     <div className='flex items-center gap-4'>
                         <span className='text-secondary text-[28px] font-semibold'>({filteredGroups.length.toString().padStart(2, '0')})</span>
                         <span className='text-foreground text-[28px] font-semibold'>nursery groups found</span>

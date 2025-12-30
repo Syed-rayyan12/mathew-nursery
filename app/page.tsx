@@ -17,21 +17,22 @@ import Footer from '@/components/landing-page/footer'
 const page = () => {
   return (
     <>
-      
+
       <MiniNav />
       <Header />
       <HeroBanner />
-      <FeaturesSection />
+       <CTASection />
+      {/* <FeaturesSection /> */}
       <AboutUsSection />
       <NurseryCardsSection />
       <CircleGridSection />
-        <FeaturesCardsSection />
+      <FeaturesCardsSection />
       <CTASection />
-      {/* <CreateNurseryHero/>
-       <TestimonialSlider />
-        <ArticleNews />
-        <NewsletterSignup/>
-         <Footer /> */}
+      <CreateNurseryHero />
+      <TestimonialSlider />
+      <ArticleNews />
+      <NewsletterSignup />
+      <Footer />
 
 
     </>

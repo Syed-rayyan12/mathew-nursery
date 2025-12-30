@@ -7,6 +7,7 @@ import articleRoutes from './article.routes';
 import contactRoutes from './contact.routes';
 import adminRoutes from './admin.routes';
 import groupRoutes from './group.routes';
+import notificationRoutes from './notification.routes';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/articles', articleRoutes);
 router.use('/contact', contactRoutes);
 router.use('/admin', adminRoutes);  // Admin routes
 router.use('/groups', groupRoutes);  // Group routes
+router.use('/notifications', notificationRoutes);  // Notification routes
 
 export default router;

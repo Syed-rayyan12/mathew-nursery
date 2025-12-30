@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/api/auth'
 import { toast } from 'sonner'
+import { MapPin } from 'lucide-react'
 
 const SignupPage = () => {
   const router = useRouter()
@@ -18,10 +19,12 @@ const SignupPage = () => {
     phone: '',
     password: '',
     confirmPassword: '',
+    address: '',
   })
   const [loading, setLoading] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
   const [error, setError] = useState('')
+  const [locationLoading, setLocationLoading] = useState(false)
 
   // Check if already authenticated, redirect to home
   useEffect(() => {
@@ -31,18 +34,125 @@ const SignupPage = () => {
   }, [router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
+    const { name, value } = e.target
+    
+    // Format UK phone number as user types
+    if (name === 'phone') {
+      const cleaned = value.replace(/\D/g, '')
+      let formatted = ''
+      
+      if (cleaned.startsWith('44')) {
+        // Format: +44 XXXX XXXXXX
+        formatted = '+44'
+        if (cleaned.length > 2) formatted += ' ' + cleaned.substring(2, 6)
+        if (cleaned.length > 6) formatted += ' ' + cleaned.substring(6, 12)
+      } else if (cleaned.startsWith('0')) {
+        // Format: 0XXXX XXXXXX
+        formatted = cleaned.substring(0, 5)
+        if (cleaned.length > 5) formatted += ' ' + cleaned.substring(5, 11)
+      } else if (value.startsWith('+44')) {
+        formatted = value
+      } else {
+        formatted = cleaned.substring(0, 11)
+      }
+      
+      setFormData({ ...formData, [name]: formatted })
+    } else {
+      setFormData({ ...formData, [name]: value })
+    }
+  }
+
+  const validateUKPhone = (phone: string) => {
+    const cleaned = phone.replace(/\s/g, '')
+    // UK formats: +44XXXXXXXXXX (10-11 digits after +44) or 0XXXXXXXXXX (10-11 digits starting with 0)
+    const ukPhoneRegex = /^(\+44[1-9]\d{9,10}|0[1-9]\d{9,10})$/
+    return ukPhoneRegex.test(cleaned)
+  }
+
+  const getLocation = async () => {
+    setLocationLoading(true)
+    setError('')
+    
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser')
+      setLocationLoading(false)
+      return
+    }
+
+    toast.info('Requesting location access...')
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords
+          
+          // Use reverse geocoding to get address
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            {
+              headers: {
+                'User-Agent': 'MathewNursery/1.0'
+              }
+            }
+          )
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch address')
+          }
+          
+          const data = await response.json()
+          
+          if (data.display_name) {
+            setFormData(prev => ({ ...prev, address: data.display_name }))
+            toast.success('Location retrieved successfully!')
+          } else {
+            toast.warning('Could not retrieve address. Please enter manually.')
+          }
+        } catch (err) {
+          console.error('Geocoding error:', err)
+          toast.error('Failed to retrieve address. Please enter manually.')
+        } finally {
+          setLocationLoading(false)
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err)
+        let errorMessage = 'Unable to access location. '
+        
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage += 'Please allow location access in your browser settings.'
+            break
+          case err.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.'
+            break
+          case err.TIMEOUT:
+            errorMessage += 'Location request timed out.'
+            break
+          default:
+            errorMessage += 'Please enter address manually.'
+        }
+        
+        toast.error(errorMessage)
+        setLocationLoading(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Validate passwords match
-   
+    // Validate UK phone format
+    if (!validateUKPhone(formData.phone)) {
+      setError('Please enter a valid UK phone number (e.g., +44 7123 456789 or 07123 456789)')
+      return
+    }
 
     // Validate password length
     if (formData.password.length < 6) {
@@ -159,16 +269,43 @@ const SignupPage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">Phone Number (UK Only)</Label>
             <Input
               id="phone"
               name="phone"
               type="tel"
-              placeholder="+44 123 456 7890"
+              placeholder="+44 7123 456789 or 07123 456789"
               value={formData.phone}
               onChange={handleChange}
+              maxLength={17}
               required
             />
+            <p className="text-xs text-gray-500">UK phone numbers only</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <div className="relative">
+              <Input
+                id="address"
+                name="address"
+                type="text"
+                placeholder="Enter your address or use location"
+                value={formData.address}
+                onChange={handleChange}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={getLocation}
+                disabled={locationLoading}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                title="Get current location"
+              >
+                <MapPin className={`h-5 w-5 text-secondary ${locationLoading ? 'animate-pulse' : ''}`} />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500">Click the location icon to auto-fill your address</p>
           </div>
 
           <div className="space-y-2">

@@ -10,9 +10,9 @@ const AboutUsSection = () => {
                     {/* Left side - Image */}
                     <div className="flex-1">
                         <img
-                            src="/images/girl.png"
+                            src="/images/about.png"
                             alt="About Us"
-                            className="w-full h-auto object-cover"
+                            className="w-full h-full object-cover rounded-md"
                         />
                     </div>
 
@@ -28,8 +28,13 @@ const AboutUsSection = () => {
 
                         {/* Paragraph */}
                         <p className="text-gray-600 text-lg leading-relaxed">
-                          At My Nursery, we believe that every child deserves a safe, happy, and inspiring start in life. Our mission is simple — to connect families with trusted nurseries and childcare providers across the UK.
-We’ve built a platform that brings together parents searching for the perfect nursery and early years professionals who are passionate about what they do. Whether you’re a parent looking for a nurturing environment for your little one, or a nursery seeking to reach more local families, My Nursery helps you make that connection with confidence.
+                        At My Nursery, we believe every child deserves a safe, joyful, and inspiring start in life. That’s why we’ve created this website with the ambition to become the UK’s leading platform for connecting families with trusted nurseries and childcare providers.
+
+For parents, this is the first place to go when searching for the perfect nursery placement, a one‑stop destination to discover nurturing environments tailored to your little one’s needs.
+
+For nurseries and nursery groups, it’s the best location to advertise your services, reach more local families, and showcase the passion and care that makes your setting unique.
+
+Whether you’re a parent ready to find the right fit, or a nursery looking to grow your community, My Nursery brings everyone together with confidence, warmth, and a smile.
                         </p>
 
                         {/* Read More Button */}

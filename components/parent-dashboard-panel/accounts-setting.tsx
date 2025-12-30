@@ -7,6 +7,7 @@ import { authService } from '@/lib/api/auth'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/api/client'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { MapPin } from 'lucide-react'
 
 const AccountsSetting = () => {
     const [user, setUser] = useState<any>(null);
@@ -14,11 +15,15 @@ const AccountsSetting = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [locationLoading, setLocationLoading] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
-        phone: ''
+        phone: '',
+        address: '',
+        city: '',
+        postcode: ''
     });
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -34,16 +39,156 @@ const AccountsSetting = () => {
                 firstName: userData.firstName || '',
                 lastName: userData.lastName || '',
                 email: userData.email || '',
-                phone: userData.phone || ''
+                phone: userData.phone || '',
+                address: userData.address || '',
+                city: '',
+                postcode: ''
             });
         }
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        
+        // Format UK phone number as user types
+        if (name === 'phone') {
+            const cleaned = value.replace(/\D/g, '');
+            let formatted = '';
+            
+            if (cleaned.startsWith('44')) {
+                formatted = '+44';
+                if (cleaned.length > 2) formatted += ' ' + cleaned.substring(2, 6);
+                if (cleaned.length > 6) formatted += ' ' + cleaned.substring(6, 12);
+            } else if (cleaned.startsWith('0')) {
+                formatted = cleaned.substring(0, 5);
+                if (cleaned.length > 5) formatted += ' ' + cleaned.substring(5, 11);
+            } else if (value.startsWith('+44')) {
+                formatted = value;
+            } else {
+                formatted = cleaned.substring(0, 11);
+            }
+            
+            setFormData({ ...formData, [name]: formatted });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const validateUKPhone = (phone: string) => {
+        if (!phone) return true; // Phone is optional
+        const cleaned = phone.replace(/\s/g, '');
+        const ukPhoneRegex = /^(\+44[1-9]\d{9,10}|0[1-9]\d{9,10})$/;
+        return ukPhoneRegex.test(cleaned);
+    };
+
+    // Parse address from nominatim API response object
+    const parseAddress = (addressData: any) => {
+        let address = '';
+        let city = '';
+        let postcode = '';
+
+        // Extract address (combination of house_number and road)
+        if (addressData.house_number && addressData.road) {
+            address = `${addressData.house_number} ${addressData.road}`;
+        } else if (addressData.road) {
+            address = addressData.road;
+        } else if (addressData.display_name) {
+            // Fallback to first part of display_name if no road data
+            const parts = addressData.display_name.split(',');
+            address = parts[0] || '';
+        }
+
+        // Extract city (try multiple field names used by nominatim)
+        city = addressData.city || addressData.town || addressData.suburb || '';
+
+        // Extract postcode
+        postcode = addressData.postcode || '';
+
+        setFormData(prev => ({
+            ...prev,
+            address: address || prev.address,
+            city: city || prev.city,
+            postcode: postcode || prev.postcode
+        }));
+    };
+
+    const getLocation = async () => {
+        setLocationLoading(true);
+        
+        if (!navigator.geolocation) {
+            toast.error('Geolocation is not supported by your browser');
+            setLocationLoading(false);
+            return;
+        }
+
+        toast.info('Requesting location access...');
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+                        {
+                            headers: {
+                                'User-Agent': 'MathewNursery/1.0'
+                            }
+                        }
+                    );
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch address');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.address || data.display_name) {
+                        // Use the address object if available (has structured city, postcode)
+                        if (data.address && (data.address.city || data.address.postcode)) {
+                            parseAddress(data.address);
+                        } else {
+                            // Fallback: still try to parse if address object doesn't have necessary fields
+                            parseAddress(data.address || { display_name: data.display_name });
+                        }
+                        toast.success('Location retrieved successfully!');
+                    } else {
+                        toast.warning('Could not retrieve address. Please enter manually.');
+                    }
+                } catch (err) {
+                    console.error('Geocoding error:', err);
+                    toast.error('Failed to retrieve address. Please enter manually.');
+                } finally {
+                    setLocationLoading(false);
+                }
+            },
+            (err) => {
+                console.error('Geolocation error:', err);
+                let errorMessage = 'Unable to access location. ';
+                
+                switch(err.code) {
+                    case err.PERMISSION_DENIED:
+                        errorMessage += 'Please allow location access in your browser settings.';
+                        break;
+                    case err.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location information is unavailable.';
+                        break;
+                    case err.TIMEOUT:
+                        errorMessage += 'Location request timed out.';
+                        break;
+                    default:
+                        errorMessage += 'Please enter address manually.';
+                }
+                
+                toast.error(errorMessage);
+                setLocationLoading(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,12 +200,19 @@ const AccountsSetting = () => {
 
     const handleSaveProfile = async () => {
         try {
+            // Validate UK phone if provided
+            if (formData.phone && !validateUKPhone(formData.phone)) {
+                toast.error('Please enter a valid UK phone number (e.g., +44 7123 456789 or 07123 456789)');
+                return;
+            }
+
             setLoading(true);
             const response = await authService.updateProfile({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
-                phone: formData.phone
+                phone: formData.phone,
+                address: formData.address
             });
 
             if (response.success && response.data) {
@@ -161,7 +313,10 @@ const AccountsSetting = () => {
                                         firstName: user?.firstName || '',
                                         lastName: user?.lastName || '',
                                         email: user?.email || '',
-                                        phone: user?.phone || ''
+                                        phone: user?.phone || '',
+                                        address: user?.address || '',
+                                        city: '',
+                                        postcode: ''
                                     });
                                 }} variant="outline" className='px-4 py-2'>
                                     Cancel
@@ -235,7 +390,7 @@ const AccountsSetting = () => {
                                     htmlFor="phone"
                                     className="mb-1 text-[16px] font-medium font-sans text-foreground"
                                 >
-                                    Phone
+                                    Phone (UK Only)
                                 </label>
                                 <input
                                     type="tel"
@@ -243,7 +398,81 @@ const AccountsSetting = () => {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    placeholder="Enter your phone number"
+                                    placeholder="+44 7123 456789 or 07123 456789"
+                                    disabled={!isEditingProfile}
+                                    maxLength={17}
+                                    className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                />
+                            </div>
+
+                            {/* Address */}
+                            <div className="flex flex-col">
+                                <label
+                                    htmlFor="address"
+                                    className="mb-1 text-[16px] font-medium font-sans text-foreground"
+                                >
+                                    Address
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        id="address"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        placeholder="Enter your address or use location"
+                                        disabled={!isEditingProfile}
+                                        className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                    />
+                                    {isEditingProfile && (
+                                        <button
+                                            type="button"
+                                            onClick={getLocation}
+                                            disabled={locationLoading}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                                            title="Get current location"
+                                        >
+                                            <MapPin className={`h-5 w-5 text-secondary ${locationLoading ? 'animate-pulse' : ''}`} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* City */}
+                            <div className="flex flex-col">
+                                <label
+                                    htmlFor="city"
+                                    className="mb-1 text-[16px] font-medium font-sans text-foreground"
+                                >
+                                    City
+                                </label>
+                                <input
+                                    type="text"
+                                    id="city"
+                                    name="city"
+                                    value={formData.city}
+                                    onChange={handleChange}
+                                    placeholder="Enter your city"
+                                    disabled={!isEditingProfile}
+                                    className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                />
+                            </div>
+
+                            {/* Postcode */}
+                            <div className="flex flex-col">
+                                <label
+                                    htmlFor="postcode"
+                                    className="mb-1 text-[16px] font-medium font-sans text-foreground"
+                                >
+                                    Postcode
+                                </label>
+                                <input
+                                    type="text"
+                                    id="postcode"
+                                    name="postcode"
+                                    value={formData.postcode}
+                                    onChange={handleChange}
+                                    placeholder="Enter your postcode"
                                     disabled={!isEditingProfile}
                                     className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                                 />

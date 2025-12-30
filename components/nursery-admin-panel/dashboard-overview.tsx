@@ -24,25 +24,8 @@ import {
   Cell,
 } from "recharts";
 import { adminService } from "@/lib/api/admin";
+import { useMonthlyUserStats, useMonthlyReviewStats } from "@/hooks/use-chart-analytics";
 import { Building2, Users, FileText, Clock } from "lucide-react";
-
-const userGrowthData = [
-  { month: "Jan", users: 200 },
-  { month: "Feb", users: 320 },
-  { month: "Mar", users: 450 },
-  { month: "Apr", users: 650 },
-  { month: "May", users: 890 },
-  { month: "Jun", users: 1200 },
-];
-
-const reviewsData = [
-  { month: "Jan", reviews: 40 },
-  { month: "Feb", reviews: 55 },
-  { month: "Mar", reviews: 70 },
-  { month: "Apr", reviews: 95 },
-  { month: "May", reviews: 120 },
-  { month: "Jun", reviews: 150 },
-];
 
 const subscriptionData = [
   { name: "Active", value: 65 },
@@ -68,6 +51,8 @@ export default function DashboardCharts() {
     rejectedReviews: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { data: monthlyUserData, total: totalMonthlyUsers, loading: userLoading, error: userError } = useMonthlyUserStats(12);
+  const { data: monthlyReviewData, total: totalMonthlyReviews, loading: reviewLoading, error: reviewError } = useMonthlyReviewStats(12);
 
   useEffect(() => {
     fetchStats();
@@ -92,7 +77,7 @@ export default function DashboardCharts() {
       {/* WELCOME CARD */}
       <div className="shadow-md w-full rounded-lg p-4 text-white bg-white">
       
-        <h2 className="text-secondary font-medium text-[48px] font-heading">
+        <h2 className="text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading">
         <span className="text-foreground">WELCOME BACK, </span>ADMIN
       </h2>
           <p className="text-lg opacity-90 text-foreground">Manage your workspace with confidence.</p>
@@ -164,23 +149,40 @@ export default function DashboardCharts() {
         <Card className="flex-1 shadow-md">
           <CardHeader>
             <CardTitle>New Users Over Time</CardTitle>
-             <CardDescription>Cumulative user growth by month</CardDescription>
+             <CardDescription>Monthly user registrations (Last 12 months)</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={userGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="users"
-                  stroke="#04B0D6"
-                  strokeWidth={3}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {userLoading ? (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Loading chart data...
+              </div>
+            ) : userError ? (
+              <div className="h-[250px] flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-red-500 font-medium">Error loading data</p>
+                  <p className="text-sm text-muted-foreground">{userError}</p>
+                </div>
+              </div>
+            ) : monthlyUserData && monthlyUserData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={monthlyUserData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="users"
+                    stroke="#04B0D6"
+                    strokeWidth={3}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No data available
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -188,18 +190,35 @@ export default function DashboardCharts() {
         <Card className="flex-1 shadow-md">
           <CardHeader>
             <CardTitle>Reviews Trend</CardTitle>
-              <CardDescription>New reviews submitted by month</CardDescription>
+              <CardDescription>Monthly reviews submitted (Last 12 months)</CardDescription>
           </CardHeader>
           <CardContent className="w-full">
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={reviewsData} barSize={30}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="reviews" fill="#04B0D6" />
-              </BarChart>
-            </ResponsiveContainer>
+            {reviewLoading ? (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Loading chart data...
+              </div>
+            ) : reviewError ? (
+              <div className="h-[250px] flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-red-500 font-medium">Error loading data</p>
+                  <p className="text-sm text-muted-foreground">{reviewError}</p>
+                </div>
+              </div>
+            ) : monthlyReviewData && monthlyReviewData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={monthlyReviewData} barSize={30}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="reviews" fill="#04B0D6" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No data available
+              </div>
+            )}
           </CardContent>
         </Card>
 

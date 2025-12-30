@@ -27,7 +27,9 @@ export default function Header() {
       <header className="w-full h-20 bg-white dark:bg-black shadow-md sticky top-0 flex items-center justify-between xl:px-24 lg:px-12 max-lg:px-10 z-50">
         
         {/* LOGO */}
+        <Link href="/">
         <img src="/images/logo.png" alt="" className="object-cover"  width={200} height={200}/>
+        </Link>
 
         {/* CENTER LINKS */}
         <nav className="hidden lg:flex items-center gap-8 text-base font-medium">

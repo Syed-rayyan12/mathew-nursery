@@ -105,8 +105,8 @@ const MyReviews = () => {
       </div>
 
       {/* Table */}
-      <div className="rounded-md bg-white shadow p-4 ">
-        <table className="w-full text-left  border-collapse">
+      <div className="rounded-md bg-white shadow p-4 overflow-x-auto">
+        <table className="w-full text-left  border-collapse ">
           <thead className="bg-[#D1D5DB] ">
             <tr className="">
               <th className="px-6 py-3 text-lg tracking-[0.1rem] font-bold font-heading text-foreground ">

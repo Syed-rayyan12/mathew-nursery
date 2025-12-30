@@ -5,9 +5,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 
 const stats = [
-    { percent: '65%', text: 'Happy Parents', color: '#3CC1DC' },
-    { percent: '96%', text: 'Happy Children', color: '#D0508C' },
-    { percent: '100%', text: 'Satisfaction Rate', color: '#F15F25' },
+    { percent: '65%', text: 'Nurseries Join Today', color: '#3CC1DC' },
+    { percent: '', text: 'Join Today', color: '#D0508C' },
+    { percent: '', text: 'Multi-Year Discount', color: '#F15F25' },
 ];
 
 const CTASection = () => {
@@ -25,7 +25,7 @@ const CTASection = () => {
                     </Button>
                 </div>
                 <div className="flex-1">
-                    <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-1">
+                    <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-3 max-sm:grid-cols-1">
                         {stats.map((stat, index) => (
                             <div
                                 key={index}

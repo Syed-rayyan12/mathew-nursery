@@ -318,7 +318,7 @@ export default function ReviewsOverview() {
                       {item.label}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-between">
+                  <CardContent className="flex items-center max-md: justify-between">
                     <span className="text-3xl font-semibold font-sans text-[36px] text-gray-900">
                       {item.value}
                     </span>

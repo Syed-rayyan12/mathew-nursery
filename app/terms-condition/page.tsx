@@ -10,7 +10,7 @@ export default function page() {
      <Header/>
      <TermsAndConditions/>
      <div className="bg-white py-20">
-    <div className="px-24 mx-auto p-6 space-y-6">
+    <div className="px-24 max-sm:px-8 mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">Terms & Conditions</h1>
 
       <section className="space-y-3">

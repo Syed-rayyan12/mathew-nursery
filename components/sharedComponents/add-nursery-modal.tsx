@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "../ui/separator";
-import { Plus, X, Upload, Trash2 } from "lucide-react";
+import { Plus, X, Upload, Trash2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { nurseryDashboardService } from "@/lib/api/nursery";
+import { authService } from "@/lib/api/auth";
 
 export default function AddNurseryModal({
   open,
@@ -27,6 +28,7 @@ export default function AddNurseryModal({
   onSuccess?: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [cardImagePreview, setCardImagePreview] = useState<string>('');
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoPreview, setVideoPreview] = useState<string>('');
@@ -51,6 +53,127 @@ export default function AddNurseryModal({
     fees3to5Full: "",
     fees3to5Part: "",
   });
+
+  // Load user data and parse address on mount or when dialog opens
+  useEffect(() => {
+    if (open) {
+      const user = authService.getCurrentUser();
+      if (user?.address) {
+        parseAddress(user.address);
+      }
+    }
+  }, [open]);
+
+  // Parse address from nominatim API response object
+  const parseAddress = (addressData: any) => {
+    let address = '';
+    let city = '';
+    let postcode = '';
+
+    // Extract address (combination of house_number and road)
+    if (addressData.house_number && addressData.road) {
+      address = `${addressData.house_number} ${addressData.road}`;
+    } else if (addressData.road) {
+      address = addressData.road;
+    } else if (addressData.display_name) {
+      // Fallback to first part of display_name if no road data
+      const parts = addressData.display_name.split(',');
+      address = parts[0] || '';
+    }
+
+    // Extract city (try multiple field names used by nominatim)
+    city = addressData.city || addressData.town || addressData.suburb || '';
+
+    // Extract postcode
+    postcode = addressData.postcode || '';
+
+    setFormData(prev => ({
+      ...prev,
+      address: address || prev.address,
+      city: city || prev.city,
+      postcode: postcode || prev.postcode
+    }));
+  };
+
+  const getLocation = async () => {
+    setLocationLoading(true);
+    
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      setLocationLoading(false);
+      return;
+    }
+
+    toast.info('Requesting location access...');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            {
+              headers: {
+                'User-Agent': 'MathewNursery/1.0'
+              }
+            }
+          );
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch address');
+          }
+          
+          const data = await response.json();
+          
+          if (data.address || data.display_name) {
+            // Use the address object if available (has structured city, postcode)
+            // Fall back to display_name if address object is incomplete
+            if (data.address && (data.address.city || data.address.postcode)) {
+              parseAddress(data.address);
+            } else {
+              // Fallback: still try to parse display_name if address object doesn't have necessary fields
+              parseAddress(data.address || { display_name: data.display_name });
+            }
+            toast.success('Location retrieved successfully!');
+          } else {
+            toast.warning('Could not retrieve address. Please enter manually.');
+          }
+        } catch (err) {
+          console.error('Geocoding error:', err);
+          toast.error('Failed to retrieve address. Please enter manually.');
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        let errorMessage = 'Unable to access location. ';
+        
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage += 'Please allow location access in your browser settings.';
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.';
+            break;
+          case err.TIMEOUT:
+            errorMessage += 'Location request timed out.';
+            break;
+          default:
+            errorMessage += 'Please enter address manually.';
+        }
+        
+        toast.error(errorMessage);
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -252,15 +375,28 @@ export default function AddNurseryModal({
 
           {/* Address */}
           <div>
-            <h3 className="font-medium text-lg mb-4">Address</h3>
+            <h3 className="font-medium text-lg mb-4 flex items-center justify-between">
+              <span>Address</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={getLocation}
+                disabled={locationLoading}
+                className="text-xs"
+              >
+                <MapPin className={`h-4 w-4 mr-1 ${locationLoading ? 'animate-pulse' : ''}`} />
+                {locationLoading ? 'Getting Location...' : 'Use My Location'}
+              </Button>
+            </h3>
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label className="block mb-2">Address *</Label>
+                <Label className="block mb-2">Street Address *</Label>
                 <Input
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Street address"
+                  placeholder="123 High Street"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -270,7 +406,7 @@ export default function AddNurseryModal({
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="City"
+                    placeholder="London"
                   />
                 </div>
                 <div>

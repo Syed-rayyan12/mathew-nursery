@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import { NotFoundError, UnauthorizedError } from '../utils';
 import { AuthRequest } from '../middleware';
 import { generateShortId } from '../utils/id-generator';
+import { createNotification } from './notification.controller';
 
 // Get nursery owner's GROUP (created via nursery signup/dashboard)
 export const getMyNursery = async (
@@ -35,10 +36,10 @@ export const getMyNursery = async (
     });
 
     // Calculate average rating for each nursery
-    const nurseriesWithRatings = userNurseries.map(nursery => {
+    const nurseriesWithRatings = userNurseries.map((nursery: any) => {
       const approvedReviews = nursery.reviews;
       const averageRating = approvedReviews.length > 0
-        ? approvedReviews.reduce((sum, r) => sum + r.overallRating, 0) / approvedReviews.length
+        ? approvedReviews.reduce((sum: number, r: any) => sum + r.overallRating, 0) / approvedReviews.length
         : 0;
 
       const { reviews, ...nurseryData } = nursery;
@@ -158,6 +159,18 @@ export const createNursery = async (
         isApproved: true,
       },
     });
+
+    // Create notification for new nursery creation
+    try {
+      await createNotification(
+        'New Nursery Created',
+        `New nursery "${name}" has been created by a nursery owner`,
+        'NURSERY',
+        newNursery.id
+      );
+    } catch (notificationError) {
+      console.error('Failed to create notification:', notificationError);
+    }
 
     res.status(201).json({
       success: true,
@@ -540,9 +553,9 @@ export const getMyNurseryReviews = async (
     ]);
 
     // Calculate average rating from approved reviews only
-    const approvedReviews = allReviews.filter(r => r.isApproved && !r.isRejected);
+    const approvedReviews = allReviews.filter((r: any) => r.isApproved && !r.isRejected);
     const averageRating = approvedReviews.length > 0
-      ? approvedReviews.reduce((sum, r) => sum + r.overallRating, 0) / approvedReviews.length
+      ? approvedReviews.reduce((sum: number, r: any) => sum + r.overallRating, 0) / approvedReviews.length
       : 0;
 
     res.json({

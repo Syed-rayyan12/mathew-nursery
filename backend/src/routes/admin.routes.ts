@@ -13,6 +13,8 @@ import {
   getUsersPendingApproval,
   approveUser,
   rejectUser,
+  getMonthlyUserStats,
+  getMonthlyReviewStats,
 } from '../controllers/admin.controller';
 import { authenticate } from '../middleware';
 
@@ -28,6 +30,10 @@ router.get('/users', authenticate, getAllUsers);  // Regular users only
 router.get('/nursery-owners', authenticate, getAllNurseryOwners);  // Nursery owners only
 router.get('/reviews', authenticate, getAllReviews);  // All reviews
 router.get('/stats', authenticate, getDashboardStats);
+
+// Analytics routes
+router.get('/analytics/monthly-users', authenticate, getMonthlyUserStats);
+router.get('/analytics/monthly-reviews', authenticate, getMonthlyReviewStats);
 
 // Delete routes
 router.delete('/groups/:id', authenticate, deleteGroup);

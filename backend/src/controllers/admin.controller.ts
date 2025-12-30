@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
 import { comparePassword, generateTokens, UnauthorizedError } from '../utils';
 import { AuthRequest } from '../middleware';
+import { createNotification } from './notification.controller';
 
 // Fixed admin credentials
 const ADMIN_EMAIL = 'admin@mathewnursery.com';
@@ -115,7 +116,7 @@ export const getAllGroups = async (
     });
 
     // Flatten the data to avoid nested objects in React
-    const flattenedGroups = groups.map(group => ({
+    const flattenedGroups = groups.map((group: any) => ({
       id: group.id,
       name: group.name,
       slug: group.slug,
@@ -229,7 +230,7 @@ export const getAllNurseriesAdmin = async (
     });
 
     // Calculate average rating and flatten data
-    const nurseriesWithRatings = nurseries.map(nursery => {
+    const nurseriesWithRatings = nurseries.map((nursery: any) => {
       const approvedReviews = nursery.reviews;
       const averageRating = approvedReviews.length > 0
         ? approvedReviews.reduce((sum: number, r: any) => sum + r.overallRating, 0) / approvedReviews.length
@@ -544,7 +545,11 @@ export const getAllReviews = async (
       sortBy = 'createdAt',
       sortOrder = 'desc',
       status = 'all', // all, pending, approved, rejected
+      page = 1,
+      limit = 20,
     } = req.query;
+
+    const skip = (Number(page) - 1) * Number(limit);
 
     // Build where clause for filtering
     const whereClause: any = {};
@@ -580,29 +585,38 @@ export const getAllReviews = async (
       orderBy[sortBy as string] = sortOrder as string;
     }
 
-    const reviews = await prisma.review.findMany({
-      where: whereClause,
-      include: {
-        nursery: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-      orderBy,
-    });
+    console.log('📋 Fetching reviews with filters:', { status, searchQuery, sortBy, sortOrder, page, limit });
 
-    const formattedReviews = reviews.map((review) => ({
+    const [reviews, totalCount] = await Promise.all([
+      prisma.review.findMany({
+        where: whereClause,
+        include: {
+          nursery: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        orderBy,
+        skip,
+        take: Number(limit),
+      }),
+      prisma.review.count({ where: whereClause }),
+    ]);
+
+    console.log(`✅ Found ${reviews.length} reviews out of ${totalCount} total`);
+
+    const formattedReviews = reviews.map((review: any) => ({
       id: review.id,
       firstName: review.firstName,
       lastName: review.lastName,
@@ -644,7 +658,15 @@ export const getAllReviews = async (
 
     res.json({
       success: true,
-      data: formattedReviews,
+      data: {
+        reviews: formattedReviews,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / Number(limit)),
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -727,9 +749,22 @@ export const approveUser = async (
         email: true,
         firstName: true,
         lastName: true,
+        role: true,
         isActive: true,
       },
     });
+
+    // Create notification for user approval
+    try {
+      await createNotification(
+        'User Approved',
+        `${user.firstName} ${user.lastName} (${user.email}) has been approved by admin`,
+        'USER',
+        user.id
+      );
+    } catch (notificationError) {
+      console.error('Failed to create notification:', notificationError);
+    }
 
     res.json({
       success: true,
@@ -762,6 +797,154 @@ export const rejectUser = async (
     res.json({
       success: true,
       message: 'User rejected and deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get monthly user registration data
+export const getMonthlyUserStats = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { months = 12 } = req.query;
+    const monthsCount = Number(months);
+
+    // Get current date
+    const now = new Date();
+    
+    // Get users from last N months
+    const startDate = new Date(now.getFullYear(), now.getMonth() - monthsCount + 1, 1);
+
+    const users = await prisma.user.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+      },
+      select: {
+        createdAt: true,
+      },
+    });
+
+    // Group by month
+    const monthlyData: { [key: string]: number } = {};
+    
+    for (let i = monthsCount - 1; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+      monthlyData[monthKey] = 0;
+    }
+
+    // Count users per month
+    users.forEach((user) => {
+      const monthKey = new Date(user.createdAt).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+      if (monthlyData[monthKey] !== undefined) {
+        monthlyData[monthKey]++;
+      }
+    });
+
+    const chartData = Object.entries(monthlyData).map(([month, count]) => ({
+      month,
+      users: count,
+      _count: count,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        monthlyUsers: chartData,
+        totalUsers: users.length,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get monthly review submission data
+export const getMonthlyReviewStats = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { months = 12 } = req.query;
+    const monthsCount = Number(months);
+
+    // Get current date
+    const now = new Date();
+    
+    // Get reviews from last N months
+    const startDate = new Date(now.getFullYear(), now.getMonth() - monthsCount + 1, 1);
+
+    const reviews = await prisma.review.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+      },
+      select: {
+        createdAt: true,
+        isApproved: true,
+      },
+    });
+
+    // Group by month
+    const monthlyData: { 
+      [key: string]: { 
+        total: number; 
+        approved: number; 
+      } 
+    } = {};
+    
+    for (let i = monthsCount - 1; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+      monthlyData[monthKey] = { total: 0, approved: 0 };
+    }
+
+    // Count reviews per month
+    reviews.forEach((review) => {
+      const monthKey = new Date(review.createdAt).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+      if (monthlyData[monthKey] !== undefined) {
+        monthlyData[monthKey].total++;
+        if (review.isApproved) {
+          monthlyData[monthKey].approved++;
+        }
+      }
+    });
+
+    const chartData = Object.entries(monthlyData).map(([month, data]) => ({
+      month,
+      reviews: data.total,
+      approved: data.approved,
+      pending: data.total - data.approved,
+      _count: data.total,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        monthlyReviews: chartData,
+        totalReviews: reviews.length,
+        totalApproved: reviews.filter(r => r.isApproved).length,
+      },
     });
   } catch (error) {
     next(error);

@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MapPin } from "lucide-react";
 
 export default function NurserySignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,6 +21,7 @@ export default function NurserySignupPage() {
     password: "",
     phone: "",
     nurseryName: "",
+    address: "",
   });
   const [errors, setErrors] = useState({
     firstName: "",
@@ -28,14 +30,37 @@ export default function NurserySignupPage() {
     password: "",
     phone: "",
     nurseryName: "",
+    address: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    
+    // Format UK phone number as user types
+    if (name === 'phone') {
+      const cleaned = value.replace(/\D/g, '');
+      let formatted = '';
+      
+      if (cleaned.startsWith('44')) {
+        // Format: +44 XXXX XXXXXX
+        formatted = '+44';
+        if (cleaned.length > 2) formatted += ' ' + cleaned.substring(2, 6);
+        if (cleaned.length > 6) formatted += ' ' + cleaned.substring(6, 12);
+      } else if (cleaned.startsWith('0')) {
+        // Format: 0XXXX XXXXXX
+        formatted = cleaned.substring(0, 5);
+        if (cleaned.length > 5) formatted += ' ' + cleaned.substring(5, 11);
+      } else if (value.startsWith('+44')) {
+        formatted = value;
+      } else {
+        formatted = cleaned.substring(0, 11);
+      }
+      
+      setFormData({ ...formData, [name]: formatted });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+    
     // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors({
@@ -43,6 +68,87 @@ export default function NurserySignupPage() {
         [name]: "",
       });
     }
+  };
+
+  const validateUKPhone = (phone: string) => {
+    const cleaned = phone.replace(/\s/g, '');
+    // UK formats: +44XXXXXXXXXX (10-11 digits after +44) or 0XXXXXXXXXX (10-11 digits starting with 0)
+    const ukPhoneRegex = /^(\+44[1-9]\d{9,10}|0[1-9]\d{9,10})$/;
+    return ukPhoneRegex.test(cleaned);
+  };
+
+  const getLocation = async () => {
+    setLocationLoading(true);
+    
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      setLocationLoading(false);
+      return;
+    }
+
+    toast.info('Requesting location access...');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Use reverse geocoding to get address
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            {
+              headers: {
+                'User-Agent': 'MathewNursery/1.0'
+              }
+            }
+          );
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch address');
+          }
+          
+          const data = await response.json();
+          
+          if (data.display_name) {
+            setFormData(prev => ({ ...prev, address: data.display_name }));
+            toast.success('Location retrieved successfully!');
+          } else {
+            toast.warning('Could not retrieve address. Please enter manually.');
+          }
+        } catch (err) {
+          console.error('Geocoding error:', err);
+          toast.error('Failed to retrieve address. Please enter manually.');
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        let errorMessage = 'Unable to access location. ';
+        
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage += 'Please allow location access in your browser settings.';
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.';
+            break;
+          case err.TIMEOUT:
+            errorMessage += 'Location request timed out.';
+            break;
+          default:
+            errorMessage += 'Please enter address manually.';
+        }
+        
+        toast.error(errorMessage);
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   };
 
   const validateForm = () => {
@@ -53,6 +159,7 @@ export default function NurserySignupPage() {
       password: "",
       phone: "",
       nurseryName: "",
+      address: "",
     };
     let isValid = true;
 
@@ -98,12 +205,12 @@ export default function NurserySignupPage() {
       isValid = false;
     }
 
-    // Phone validation
+    // UK Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
       isValid = false;
-    } else if (!/^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = "Please enter a valid phone number";
+    } else if (!validateUKPhone(formData.phone)) {
+      newErrors.phone = "Please enter a valid UK phone number (e.g., +44 7123 456789 or 07123 456789)";
       isValid = false;
     }
 
@@ -261,20 +368,49 @@ export default function NurserySignupPage() {
 
             {/* Phone */}
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone">Phone Number (UK Only) *</Label>
               <Input
                 id="phone"
                 name="phone"
                 type="tel"
-                placeholder="+44 20 1234 5678"
+                placeholder="+44 7123 456789 or 07123 456789"
                 value={formData.phone}
                 onChange={handleChange}
                 disabled={isLoading}
+                maxLength={17}
                 className={errors.phone ? "border-red-500" : ""}
               />
               <div className={`overflow-hidden transition-all duration-500 ease-in-out ${errors.phone ? 'max-h-10 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'}`}>
                 <span className="text-red-500 text-sm block mt-1">{errors.phone || ' '}</span>
               </div>
+              <p className="text-xs text-gray-500">UK phone numbers only</p>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="address">Nursery Address</Label>
+              <div className="relative">
+                <Input
+                  id="address"
+                  name="address"
+                  type="text"
+                  placeholder="Enter nursery address or use location"
+                  value={formData.address}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className={`pr-10 ${errors.address ? "border-red-500" : ""}`}
+                />
+                <button
+                  type="button"
+                  onClick={getLocation}
+                  disabled={locationLoading || isLoading}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+                  title="Get current location"
+                >
+                  <MapPin className={`h-5 w-5 text-secondary ${locationLoading ? 'animate-pulse' : ''}`} />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">Click the location icon to auto-fill your address</p>
             </div>
 
             {/* Password */}

@@ -126,10 +126,10 @@ export default function NurseryDetailsPage() {
     <>
      <MiniNav/>
     <Header/>
-    <div className="w-full mx-auto py-10 px-24 shadow-xl bg-white">
+    <div className="w-full mx-auto py-6 md:py-10 px-4 md:px-12 lg:px-24 shadow-xl bg-white">
       {/* HEADER SECTION */}
-      <div className="bg-white p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between ">
+      <div className="bg-white p-3 md:p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-medium uppercase">{nursery?.name || 'Nursery Name'}</h1>
             <p className="text-gray-700 mb-2">{nursery?.address || ''}, {nursery?.city || ''}</p>
@@ -138,7 +138,7 @@ export default function NurseryDetailsPage() {
               <span className="text-gray-600 ml-2">({nursery.reviewCount || 0} reviews)</span>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="hidden md:flex gap-3">
             <button 
               onClick={() => swiperRef.current?.slidePrev()}
               className="bg-secondary hover:bg-secondary/90 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-colors"
@@ -158,11 +158,19 @@ export default function NurseryDetailsPage() {
           </div>
         </div>
         {/* IMAGES SLIDER - 2 per row */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={12}
-            slidesPerView={3}
+            slidesPerView={1}
+            breakpoints={{
+              640: {
+                slidesPerView: 2,
+              },
+              1024: {
+                slidesPerView: 3,
+              },
+            }}
             onSwiper={(swiper) => (swiperRef.current = swiper)}
             autoplay={{ delay: 3500, disableOnInteraction: false }}
             pagination={{ clickable: true }}
@@ -177,7 +185,7 @@ export default function NurseryDetailsPage() {
                 <SwiperSlide key={index}>
                   <img
                     src={image}
-                    className="h-96 w-full object-cover rounded-lg"
+                    className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                     alt={`${nursery.name} - Image ${index + 1}`}
                   />
                 </SwiperSlide>
@@ -187,21 +195,21 @@ export default function NurseryDetailsPage() {
                 <SwiperSlide>
                   <img
                     src="/images/slug-1.png"
-                    className="h-96 w-full object-cover rounded-lg"
+                    className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                     alt={nursery.name}
                   />
                 </SwiperSlide>
                 <SwiperSlide>
                   <img
                     src="/images/slug-2.png"
-                    className="h-96 w-full object-cover rounded-lg"
+                    className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                     alt={`${nursery.name} - Image 2`}
                   />
                 </SwiperSlide>
                 <SwiperSlide>
                   <img
                     src="/images/slug-3.png"
-                    className="h-96 w-full object-cover rounded-lg"
+                    className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                     alt={`${nursery.name} - Image 3`}
                   />
                 </SwiperSlide>
@@ -212,8 +220,8 @@ export default function NurseryDetailsPage() {
 
         {/* Video Section */}
         {nursery.videoUrl && (
-          <div className="mt-6 mb-6">
-            <h3 className="text-2xl font-semibold mb-4 text-[#044A55] font-heading">VIDEO TOUR</h3>
+          <div className="mt-4 md:mt-6 mb-4 md:mb-6">
+            <h3 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4 text-[#044A55] font-heading">VIDEO TOUR</h3>
             <div className="aspect-video w-full rounded-lg overflow-hidden shadow-md">
               <iframe
                 src={getEmbedUrl(nursery.videoUrl)}
@@ -229,19 +237,19 @@ export default function NurseryDetailsPage() {
 
 
 
-      <div className="grid grid-cols-3 gap-6 ">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* LEFT MAIN CONTENT */}
-        <div className="col-span-2 bg-white mt-10 px-4 pt-4 pb-20 shadow-[0px_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px]">
+        <div className="col-span-1 lg:col-span-2 bg-white mt-6 md:mt-10 px-3 md:px-4 pt-3 md:pt-4 pb-10 md:pb-20 shadow-[0px_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px]">
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid  grid-cols-2 bg-transparent gap-4 h-auto">
-              <TabsTrigger value="about" className="data-[state=active]:border-b-2  data-[state=active]:border-secondary data-[state=active]:text-secondary cursor-pointer font-medium font-heading text-[24px] data-[state=active]:bg-transparent data-[state=active]:shadow-none">About</TabsTrigger>
-              <TabsTrigger value="reviews" className="data-[state=active]:border-b-2 data-[state=active]:border-secondary data-[state=active]:text-secondary  cursor-pointer font-medium font-heading text-[24px] data-[state=active]:bg-transparent data-[state=active]:shadow-none">Reviews</TabsTrigger>
+            <TabsList className="grid grid-cols-2 bg-transparent gap-2 md:gap-4 h-auto">
+              <TabsTrigger value="about" className="data-[state=active]:border-b-2 data-[state=active]:border-secondary data-[state=active]:text-secondary cursor-pointer font-medium font-heading text-lg md:text-[24px] data-[state=active]:bg-transparent data-[state=active]:shadow-none">About</TabsTrigger>
+              <TabsTrigger value="reviews" className="data-[state=active]:border-b-2 data-[state=active]:border-secondary data-[state=active]:text-secondary cursor-pointer font-medium font-heading text-lg md:text-[24px] data-[state=active]:bg-transparent data-[state=active]:shadow-none">Reviews</TabsTrigger>
             </TabsList>
-            <TabsContent value="about" className="mt-5">
-              <div className="space-y-6">
+            <TabsContent value="about" className="mt-4 md:mt-5 overflow-hidden">
+              <div className="space-y-4 md:space-y-6">
                 <div>
-                  <h2 className="text-xl mb-2 text-[#044A55] font-medium text-[34px]">ABOUT US</h2>
-                  <p className="text-gray-600 leading-relaxed">
+                  <h2 className="text-xl md:text-2xl lg:text-[34px] mb-2 text-[#044A55] font-medium">ABOUT US</h2>
+                  <p className="text-sm md:text-base text-gray-600 leading-relaxed">
                     {nursery.aboutUs || nursery.description || "A warm, nurturing environment where children thrive through play-based learning and outdoor exploration."}
                   </p>
                 </div>
@@ -249,8 +257,8 @@ export default function NurseryDetailsPage() {
                 {/* PHILOSOPHY */}
                 {nursery.philosophy && (
                   <div>
-                    <h2 className="text-xl mb-2 text-[#044A55] font-medium text-[34px]">OUR PHILOSOPHY</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl md:text-2xl lg:text-[34px] mb-2 text-[#044A55] font-medium">OUR PHILOSOPHY</h2>
+                    <p className="text-sm md:text-base text-gray-600 leading-relaxed">
                       {nursery.philosophy}
                     </p>
                   </div>
@@ -258,8 +266,8 @@ export default function NurseryDetailsPage() {
 
                 {/* FACILITIES & FEATURES */}
                 <div>
-                  <h2 className="mb-2 text-[#044A55] font-medium text-[34px]">FACILITIES & FEATURES</h2>
-                  <div className="grid grid-cols-2 gap-y-3 text-gray-700">
+                  <h2 className="text-xl md:text-2xl lg:text-[34px] mb-2 text-[#044A55] font-medium">FACILITIES & FEATURES</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 md:gap-y-3 text-sm md:text-base text-gray-700">
                     {nursery.facilities && nursery.facilities.length > 0 ? (
                       nursery.facilities.map((item, index) => (
                         <div key={index} className="flex items-center gap-2">
@@ -278,34 +286,34 @@ export default function NurseryDetailsPage() {
 
                 {/* FEES */}
                 <div>
-                  <h2 className="mb-2 text-[#044A55] font-medium text-[34px]">FEES & FUNDING</h2>
-                  <div className="space-y-3 text-gray-700">
+                  <h2 className="text-xl md:text-2xl lg:text-[34px] mb-2 text-[#044A55] font-medium">FEES & FUNDING</h2>
+                  <div className="space-y-2 md:space-y-3 text-sm md:text-base text-gray-700">
                     {nursery.fees && typeof nursery.fees === 'object' ? (
                       <>
                         {nursery.fees['0-2 years'] && (
                           <div className="flex justify-between border-b-2 pb-2 border-gray-200">
-                            <strong>0-2 years:</strong>
+                            <strong className="text-sm md:text-base">0-2 years:</strong>
                             <div className="flex flex-col text-end">
-                              <span className="ml-2 text-secondary font-bold text-[20px] pb-2">{nursery.fees['0-2 years'].fullTime}</span>
-                              <span className="ml-2 text-foreground font-sans font-medium">Part-time: {nursery.fees['0-2 years'].partTime}</span>
+                              <span className="ml-2 text-secondary font-bold text-base md:text-[20px] pb-2">{nursery.fees['0-2 years'].fullTime}</span>
+                              <span className="ml-2 text-foreground font-sans font-medium text-xs md:text-sm">Part-time: {nursery.fees['0-2 years'].partTime}</span>
                             </div>
                           </div>
                         )}
                         {nursery.fees['2-3 years'] && (
                           <div className="flex justify-between border-b-2 pb-2 border-gray-200">
-                            <strong>2-3 years:</strong>
+                            <strong className="text-sm md:text-base">2-3 years:</strong>
                             <div className="flex flex-col text-end">
-                              <span className="ml-2 text-secondary font-bold text-[20px] pb-2">{nursery.fees['2-3 years'].fullTime}</span>
-                              <span className="ml-2 text-foreground font-sans font-medium">Part-time: {nursery.fees['2-3 years'].partTime}</span>
+                              <span className="ml-2 text-secondary font-bold text-base md:text-[20px] pb-2">{nursery.fees['2-3 years'].fullTime}</span>
+                              <span className="ml-2 text-foreground font-sans font-medium text-xs md:text-sm">Part-time: {nursery.fees['2-3 years'].partTime}</span>
                             </div>
                           </div>
                         )}
                         {nursery.fees['3-5 years'] && (
                           <div className="flex justify-between border-b-2 pb-2 border-gray-200">
-                            <strong>3-5 years:</strong>
+                            <strong className="text-sm md:text-base">3-5 years:</strong>
                             <div className="flex flex-col text-end">
-                              <span className="ml-2 text-secondary font-bold text-[20px] pb-2">{nursery.fees['3-5 years'].fullTime}</span>
-                              <span className="ml-2 text-foreground font-sans font-medium">Part-time: {nursery.fees['3-5 years'].partTime}</span>
+                              <span className="ml-2 text-secondary font-bold text-base md:text-[20px] pb-2">{nursery.fees['3-5 years'].fullTime}</span>
+                              <span className="ml-2 text-foreground font-sans font-medium text-xs md:text-sm">Part-time: {nursery.fees['3-5 years'].partTime}</span>
                             </div>
                           </div>
                         )}
@@ -326,11 +334,11 @@ export default function NurseryDetailsPage() {
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="reviews" className="mt-5">
-              <div className="space-y-6">
+            <TabsContent value="reviews" className="mt-4 md:mt-5 overflow-hidden">
+              <div className="space-y-4 md:space-y-6">
                 <div>
-                  <div className="flex items-center justify-between pb-4">
-                    <h2 className="text-xl text-[#044A55] font-medium text-[34px]">PARENT REVIEWS</h2>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-0 pb-3 md:pb-4">
+                    <h2 className="text-xl md:text-2xl lg:text-[34px] text-[#044A55] font-medium">PARENT REVIEWS</h2>
                     <Button 
                       onClick={() => {
                         const params = new URLSearchParams({
@@ -343,7 +351,7 @@ export default function NurseryDetailsPage() {
                         });
                         window.location.href = `/submit-review?${params.toString()}`;
                       }}
-                      className="bg-primary text-white hover:bg-transparent hover:text-primary border-2 hover:border-primary border-tranparent cursor-pointer px-6 py-5"
+                      className="bg-primary text-white hover:bg-transparent hover:text-primary border-2 hover:border-primary border-tranparent cursor-pointer px-4 md:px-6 py-3 md:py-5 text-sm md:text-base w-full sm:w-auto"
                     >
                       Write a Review
                     </Button>
@@ -373,31 +381,31 @@ export default function NurseryDetailsPage() {
                         const avatarInitials = `${review.firstName.charAt(0)}${review.lastName.charAt(0)}`.toUpperCase();
                         
                         return (
-                          <div key={review.id} className="border-b bg-[#F9F9F9] p-4 rounded-[6px]">
-                            <div className="flex justify-between gap-4 items-center mb-4">
-                              <div className="flex gap-4 items-center">
-                                <div className="flex justify-center items-center bg-secondary rounded-full w-14 h-14">
-                                  <span className="text-xl text-white font-heading font-normal tracking-[2px]">
+                          <div key={review.id} className="border-b bg-[#F9F9F9] p-3 md:p-4 rounded-[6px]">
+                            <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-4 items-start md:items-center mb-3 md:mb-4">
+                              <div className="flex gap-3 md:gap-4 items-center w-full md:w-auto">
+                                <div className="flex justify-center items-center bg-secondary rounded-full w-12 h-12 md:w-14 md:h-14 flex-shrink-0">
+                                  <span className="text-lg md:text-xl text-white font-heading font-normal tracking-[2px]">
                                     {avatarInitials}
                                   </span>
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="font-medium text-[24px] text-[#044A55] tracking-[1px] font-heading">{displayName}</span>
-                                  <span className="text-gray-500 text-sm font-sans font-medium">{timeAgo}</span>
+                                  <span className="font-medium text-lg md:text-[24px] text-[#044A55] tracking-[1px] font-heading">{displayName}</span>
+                                  <span className="text-gray-500 text-xs md:text-sm font-sans font-medium">{timeAgo}</span>
                                 </div>
                                 {review.isVerified && (
-                                  <div className="bg-secondary rounded-2xl px-4 py-1 text-white text-sm">
+                                  <div className="bg-secondary rounded-2xl px-3 md:px-4 py-1 text-white text-xs md:text-sm">
                                     verified
                                   </div>
                                 )}
                               </div>
-                              <div>
+                              <div className="md:mt-0">
                                 <div className="flex">
                                   {Array.from({ length: 5 }, (_, i) => (
                                     <Star 
                                       key={i} 
                                       className={i < review.overallRating ? "text-yellow-500" : "text-gray-300"} 
-                                      size={16} 
+                                      size={14} 
                                       fill="currentColor" 
                                     />
                                   ))}
@@ -405,9 +413,9 @@ export default function NurseryDetailsPage() {
                               </div>
                             </div>
                             {review.connection && (
-                              <h2 className="font-heading text-[22px] font-medium text-[#1F2937] mb-3">{review.connection}</h2>
+                              <h2 className="font-heading text-base md:text-lg lg:text-[22px] font-medium text-[#1F2937] mb-2 md:mb-3">{review.connection}</h2>
                             )}
-                            <p className="text-gray-600 font-sans text-[18px]">{review.content}</p>
+                            <p className="text-gray-600 font-sans text-sm md:text-base lg:text-[18px]">{review.content}</p>
                           </div>
                         );
                       })}
@@ -421,20 +429,20 @@ export default function NurseryDetailsPage() {
         </div>
 
         {/* RIGHT CONTACT CARD */}
-        <Card className="p-4 rounded-[6px] border-none shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]  mt-10 h-fit sticky top-10">
-          <h2 className="text-[32px] font-medium mb-4 font-heading border-b">CONTACT INFORMATION</h2>
+        <Card className="p-3 md:p-4 rounded-[6px] border-none shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] mt-6 md:mt-10 h-fit lg:sticky lg:top-10">
+          <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium mb-3 md:mb-4 font-heading border-b pb-2">CONTACT INFORMATION</h2>
 
-          <div className="space-y-3 text-gray-700 text-sm">
-            <div className="flex items-center gap-4 mb-6">
-              <LocationEdit className="text-secondary" />
-              <p className="text-[15px] font-medium font-sans text-muted-foreground">
+          <div className="space-y-2 md:space-y-3 text-gray-700 text-sm">
+            <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+              <LocationEdit className="text-secondary flex-shrink-0 w-5 h-5" />
+              <p className="text-sm md:text-[15px] font-medium font-sans text-muted-foreground">
                 {nursery.address}, {nursery.city}, {nursery.postcode}
               </p>
             </div>
             {nursery.openingHours && typeof nursery.openingHours === 'object' && (
-              <div className="flex items-center gap-4 mb-6">
-                <Clock className="text-secondary" />
-                <p className="text-[15px] font-medium font-sans text-muted-foreground">
+              <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+                <Clock className="text-secondary flex-shrink-0 w-5 h-5" />
+                <p className="text-sm md:text-[15px] font-medium font-sans text-muted-foreground">
                   {nursery.openingHours.openingTime && nursery.openingHours.closingTime 
                     ? `${nursery.openingHours.openingTime} - ${nursery.openingHours.closingTime}`
                     : 'Monday - Friday: 7:30 AM - 6:30 PM'
@@ -443,20 +451,20 @@ export default function NurseryDetailsPage() {
               </div>
             )}
             {nursery.phone && (
-              <div className="flex items-center gap-4 mb-6">
-                <Phone className="text-secondary" />
-                <p className="text-[15px] font-medium font-sans text-muted-foreground">{nursery.phone}</p>
+              <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+                <Phone className="text-secondary flex-shrink-0 w-5 h-5" />
+                <p className="text-sm md:text-[15px] font-medium font-sans text-muted-foreground">{nursery.phone}</p>
               </div>
             )}
             {nursery.email && (
-              <div className="flex items-center gap-4 mb-6">
-                <Mail className="text-secondary" />
-                <p className="text-[15px] font-medium font-sans text-muted-foreground">{nursery.email}</p>
+              <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+                <Mail className="text-secondary flex-shrink-0 w-5 h-5" />
+                <p className="text-sm md:text-[15px] font-medium font-sans text-muted-foreground break-all">{nursery.email}</p>
               </div>
             )}
           </div>
 
-          <Button className="mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300">
+          <Button className="mt-4 md:mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300 text-sm md:text-base py-5 md:py-6">
             Book a Visit
           </Button>
         </Card>

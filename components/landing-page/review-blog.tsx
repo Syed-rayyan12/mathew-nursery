@@ -97,7 +97,7 @@ const ReviewBlog = () => {
                     {testimonials.map((testimonial) => (
                         <div
                             key={testimonial.id}
-                            className="relative px-6 py-14 rounded-lg min-h-[380px] flex flex-col  bg-white "
+                            className="relative px-6 max-sm:px-12 md:px-12 py-14 rounded-lg min-h-[380px] flex flex-col  bg-white "
                             style={{
                                 backgroundImage: `url(${testimonial.background})`,
                                 backgroundSize: "contain",
@@ -105,7 +105,7 @@ const ReviewBlog = () => {
                                 backgroundRepeat: "no-repeat",
                             }}
                         >
-                            <Quote className="absolute bottom-24 right-8 w-10 h-10 text-[#044A55] fill-[#044A55]" />
+                            <Quote className="absolute bottom-24 right-8 max-sm:right-14 w-10 h-10 text-[#044A55] fill-[#044A55]" />
 
                             {/* Image + Name */}
                             <div className="flex gap-4">

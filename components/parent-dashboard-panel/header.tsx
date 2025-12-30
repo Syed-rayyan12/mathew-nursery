@@ -10,13 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, ClosedCaption, HatGlassesIcon, Search, X } from 'lucide-react';
+import { Bell, ClosedCaption, HatGlassesIcon, Search, X, Menu } from 'lucide-react';
 import { Separator } from '@/components/ui/separator'; // ✅ correct import
 import { Button } from '@/components/ui/button';
 import { authService } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 
-const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+const Header = ({ onMenuClick }: HeaderProps) => {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
@@ -88,9 +92,19 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full flex items-center justify-between pr-6 gap-4 rounded-b-3xl mt-6">
+    <header className="w-full flex items-center justify-between max-sm:px-6 pr-6 gap-4 rounded-b-3xl mt-6">
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden mr-2"
+        onClick={onMenuClick}
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+
       {/* Search */}
-      <div className="flex-1 max-w-6xl relative">
+      <div className="flex-1 max-w-6xl relative max-md:hidden">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input
           placeholder="Search Nursery,Reviews..."
@@ -211,7 +225,7 @@ const Header = () => {
               <p className="text-sm text-muted-foreground">{user?.email || 'No email'}</p>
             </div>
 
-            <Separator className="my-2" />
+            <Separator className="my-0" />
 
             <DropdownMenuItem asChild>
               <Link href="/parent-dashboard/account-settings" className="text-sm text-foreground w-full">
@@ -219,19 +233,9 @@ const Header = () => {
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem asChild>
-              <Link href="/parent-dashboard/account-settings" className="text-sm text-foreground w-full">
-                Settings
-              </Link>
-            </DropdownMenuItem>
+           
 
-            <DropdownMenuItem asChild>
-              <Link href="/parent-dashboard/help-support" className="text-sm text-foreground w-full">
-                Support
-              </Link>
-            </DropdownMenuItem>
-
-            <Separator className="my-2" />
+            <Separator className="my-0" />
 
             <DropdownMenuItem onClick={handleLogout} className="text-sm text-red-500 w-full cursor-pointer">
               Logout

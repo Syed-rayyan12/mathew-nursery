@@ -104,15 +104,15 @@ export default function ManageNurseries() {
     <div className="w-full">
 
       {/* HEADER */}
-      <div className="bg-white p-4 shadow-md rounded-lg mb-4 flex justify-between items-center">
+      <div className="bg-white p-4 shadow-md rounded-lg mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-secondary font-medium text-[48px] font-heading">
+          <h2 className="text-secondary font-medium text-2xl md:text-4xl lg:text-[48px] font-heading">
             <span className="text-foreground">MANAGE</span> Nurseries
           </h2>
           <p className="text-gray-600">View, edit, and manage all platform nurseries</p>
         </div>
 
-        <Button variant="ghost" className="bg-secondary cursor-pointer" onClick={() => setOpenAddModal(true)}>
+        <Button variant="ghost" className="bg-secondary cursor-pointer w-full md:w-auto" onClick={() => setOpenAddModal(true)}>
           Add Nursery
         </Button>
       </div>

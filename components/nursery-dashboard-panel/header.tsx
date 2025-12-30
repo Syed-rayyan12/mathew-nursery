@@ -10,11 +10,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, ClosedCaption, HatGlassesIcon, Search, X } from 'lucide-react';
+import { Bell, ClosedCaption, HatGlassesIcon, Search, X, Menu } from 'lucide-react';
 import { Separator } from '@/components/ui/separator'; // ✅ correct import
 import { Button } from '@/components/ui/button';
 
-const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+const Header = ({ onMenuClick }: HeaderProps) => {
   const [ownerName, setOwnerName] = useState<string>('Nursery Owner');
   const [nurseryEmail, setNurseryEmail] = useState<string>('');
   const [initials, setInitials] = useState<string>('NO');
@@ -101,9 +105,19 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full flex items-center justify-between pr-6 gap-4 rounded-b-3xl mt-6">
+    <header className="w-full flex items-center justify-between pr-6 max-sm:px-6 gap-4 rounded-b-3xl mt-6">
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden mr-2"
+        onClick={onMenuClick}
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+
       {/* Search */}
-      <div className="flex-1 max-w-6xl relative">
+      <div className="flex-1 max-w-6xl relative max-md:hidden ">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input
           placeholder="Search Nursery,Reviews..."

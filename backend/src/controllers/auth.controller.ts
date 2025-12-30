@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import { hashPassword, comparePassword, generateTokens, ConflictError, UnauthorizedError, NotFoundError } from '../utils';
 import { AuthRequest } from '../middleware';
 import { generateShortId } from '../utils/id-generator';
+import { createNotification } from './notification.controller';
 
 // User Signup
 export const signup = async (
@@ -11,7 +12,7 @@ export const signup = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password, firstName, lastName, phone, role } = req.body;
+    const { email, password, firstName, lastName, phone, role, address } = req.body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -41,6 +42,7 @@ export const signup = async (
         firstName,
         lastName,
         phone,
+        address,
         role: userRole,
         isActive: false,
       },
@@ -50,10 +52,24 @@ export const signup = async (
         firstName: true,
         lastName: true,
         phone: true,
+        address: true,
         role: true,
         createdAt: true,
       },
     });
+
+    // Create notification for new user signup
+    try {
+      await createNotification(
+        'New User Signup',
+        `New ${userRole === 'NURSERY_OWNER' ? 'nursery owner' : 'user'} registered: ${firstName} ${lastName} (${email})`,
+        'USER',
+        user.id
+      );
+    } catch (notificationError) {
+      console.error('Failed to create notification:', notificationError);
+      // Don't fail the signup if notification fails
+    }
 
     // Generate tokens
     const tokens = generateTokens({
@@ -130,6 +146,8 @@ export const signin = async (
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          phone: user.phone,
+          address: user.address,
           role: user.role,
           isOnline: true,
         },
@@ -147,7 +165,7 @@ export const updateProfile = async (
   next: NextFunction
 ) => {
   try {
-    const { firstName, lastName, phone, avatar } = req.body;
+    const { firstName, lastName, phone, avatar, address } = req.body;
 
     const user = await prisma.user.update({
       where: { id: req.user?.userId },
@@ -156,6 +174,7 @@ export const updateProfile = async (
         lastName,
         phone,
         avatar,
+        address,
       },
       select: {
         id: true,
@@ -164,6 +183,7 @@ export const updateProfile = async (
         lastName: true,
         phone: true,
         avatar: true,
+        address: true,
         role: true,
       },
     });
@@ -186,12 +206,25 @@ export const changePassword = async (
   try {
     const { currentPassword, newPassword } = req.body;
 
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: req.user?.userId },
+      where: { id: userId },
     });
 
     if (!user) {
       throw new NotFoundError('User not found');
+    }
+
+    // Verify that the userId from token matches the user in database
+    // This prevents cross-user password updates
+    if (user.id !== userId) {
+      throw new UnauthorizedError('User ID mismatch - cannot change password for different user');
     }
 
     const isPasswordValid = await comparePassword(currentPassword, user.password);
@@ -202,10 +235,18 @@ export const changePassword = async (
 
     const hashedPassword = await hashPassword(newPassword);
 
-    await prisma.user.update({
-      where: { id: user.id },
+    // Update ONLY this specific user's password by ID
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
       data: { password: hashedPassword },
     });
+
+    // Verify the update only affected one record
+    if (!updatedUser) {
+      throw new Error('Failed to update password');
+    }
+
+    console.log(`✅ Password changed successfully for user: ${userId} (role: ${userRole})`);
 
     res.json({
       success: true,
@@ -223,7 +264,7 @@ export const nurserySignup = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password, firstName, lastName, phone, nurseryName } = req.body;
+    const { email, password, firstName, lastName, phone, nurseryName, address } = req.body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -241,8 +282,37 @@ export const nurserySignup = async (
     const userId = await generateShortId('USR');
     const groupId = await generateShortId('GRP');
 
+    // Parse address for group
+    let groupAddress = '';
+    let groupCity = '';
+    let groupPostcode = '';
+    
+    if (address) {
+      const parts = address.split(',').map((p: string) => p.trim());
+      const postcodeRegex = /\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b/i;
+      const postcodeIndex = parts.findIndex((part: string) => postcodeRegex.test(part));
+      
+      if (postcodeIndex !== -1) {
+        const postcodeMatch = parts[postcodeIndex].match(postcodeRegex);
+        groupPostcode = postcodeMatch ? postcodeMatch[0] : '';
+        if (postcodeIndex > 0) groupCity = parts[postcodeIndex - 1];
+        if (postcodeIndex > 1) groupAddress = parts.slice(0, postcodeIndex - 1).join(', ');
+        else if (postcodeIndex === 1) groupAddress = parts[0];
+      } else {
+        if (parts.length >= 3) {
+          groupAddress = parts.slice(0, -2).join(', ');
+          groupCity = parts[parts.length - 2];
+        } else if (parts.length === 2) {
+          groupAddress = parts[0];
+          groupCity = parts[1];
+        } else {
+          groupAddress = address;
+        }
+      }
+    }
+
     // Create user and group in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create user with NURSERY_OWNER role
       const user = await tx.user.create({
         data: {
@@ -252,6 +322,7 @@ export const nurserySignup = async (
           firstName,
           lastName,
           phone,
+          address,
           nurseryName,
           role: 'NURSERY_OWNER',
           isActive: false,
@@ -263,6 +334,7 @@ export const nurserySignup = async (
           firstName: true,
           lastName: true,
           phone: true,
+          address: true,
           nurseryName: true,
           role: true,
           createdAt: true,
@@ -279,6 +351,9 @@ export const nurserySignup = async (
           phone,
           firstName,
           lastName,
+          address: groupAddress,
+          city: groupCity,
+          postcode: groupPostcode,
           ownerId: user.id,
         },
       });
@@ -385,14 +460,19 @@ export const nurserySignin = async (
       success: true,
       message: 'Login successful',
       data: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        nurseryName: user.nurseryName || '',
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address,
+          nurseryName: user.nurseryName || '',
+          role: user.role,
+          isOnline: true,
+        },
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        isOnline: true,
       },
     });
   } catch (error) {

@@ -9,8 +9,8 @@ interface ApprovalTableProps {
 
 export default function ApprovalTable({ approvals = [], onView }: ApprovalTableProps) {
   return (
-    <div className="w-full mt-4">
-      <table className="w-full">
+    <div className="w-full mt-4 overflow-x-auto">
+      <table className="w-full min-w-[600px]">
         <thead>
           <tr className="bg-[#F8F8F8] border-2 border-gray-300 h-14">
             <th className="p-3 text-left" style={{ borderRadius: "4px 0px 0px 4px" }}>

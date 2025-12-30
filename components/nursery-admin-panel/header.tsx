@@ -9,11 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Menu } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import NotificationDropdown from '@/components/nursery-admin-panel/notification-dropdown';
 
-const AdminHeader = () => {
+interface AdminHeaderProps {
+  onMenuClick: () => void;
+}
+
+const AdminHeader = ({ onMenuClick }: AdminHeaderProps) => {
   const router = useRouter();
   const [adminUser, setAdminUser] = useState<any>(null);
 
@@ -60,9 +66,19 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="w-full flex items-center justify-between pr-6 gap-4 rounded-b-3xl mt-6">
+    <header className="w-full flex items-center justify-between pr-6 max-sm:px-6 gap-4 rounded-b-3xl mt-6">
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden mr-2"
+        onClick={onMenuClick}
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+
       {/* Search */}
-      <div className="flex-1 max-w-6xl relative">
+      <div className="flex-1 max-w-6xl relative max-sm:hidden">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input
           placeholder="Search..."
@@ -72,11 +88,8 @@ const AdminHeader = () => {
 
       {/* Right section */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        {/* Notifications Dropdown */}
+        <NotificationDropdown />
 
         <Separator orientation="vertical" className="h-8" />
 
@@ -100,8 +113,8 @@ const AdminHeader = () => {
               </p>
               <p className="text-xs text-gray-500">{adminUser?.email || 'admin@mathewnursery.com'}</p>
             </div>
-            <DropdownMenuItem 
-              onClick={handleLogout} 
+            <DropdownMenuItem
+              onClick={handleLogout}
               className="text-sm text-red-500 w-full cursor-pointer hover:text-red-600"
             >
               Logout

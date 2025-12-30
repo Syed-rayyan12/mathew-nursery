@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
+import { createNotification } from './notification.controller';
 
 export const submitContact = async (
   req: Request,
@@ -18,6 +19,18 @@ export const submitContact = async (
         message,
       },
     });
+
+    // Create notification for contact submission
+    try {
+      await createNotification(
+        'New Contact Message',
+        `${firstName} ${lastName} (${email}) sent a message: "${message.substring(0, 50)}..."`,
+        'USER',
+        submission.id
+      );
+    } catch (notificationError) {
+      console.error('Failed to create notification:', notificationError);
+    }
 
     res.status(201).json({
       success: true,

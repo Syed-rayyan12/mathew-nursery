@@ -5,6 +5,13 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface Article {
     id: string;
@@ -68,8 +75,43 @@ const ArticleTabs = () => {
         : articles.filter(article => article.category === activeTab)
 
     return (
-        <div className="w-full px-24 mx-auto py-8 bg-white px-6">
-            <div className="flex justify-center text-center gap-4">
+        <div className="w-full px-24 max-sm:px-8 mx-auto py-8 bg-white px-6">
+            {/* Mobile Select Dropdown - visible only on small screens */}
+            <div className="md:hidden mb-4">
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                    <SelectTrigger className="w-full h-12">
+                        <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {tabs.map((tab) => (
+                            <SelectItem key={tab.id} value={tab.id}>
+                                {tab.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Tablet Horizontal Scroll - visible on md screens */}
+            <div className="hidden md:flex lg:hidden overflow-x-auto scrollbar-hide gap-4 pb-2">
+                <div className="flex gap-4 min-w-max">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-6 py-3 rounded-md font-medium cursor-pointer transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-secondary text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Desktop Tabs - visible on large screens */}
+            <div className="hidden lg:flex justify-center gap-4">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
@@ -85,7 +127,7 @@ const ArticleTabs = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="mt-8">
+            <div className="mt-8 mb-44">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-center">

@@ -3,9 +3,9 @@ import { Eye, Trash2 } from "lucide-react";
 
 export default function UsersTable({ users = [], onView, onDelete }: any) {
     return (
-        <div className="w-full mt-4">
+        <div className="w-full mt-4 overflow-x-auto">
 
-            <table className="w-full">
+            <table className="w-full min-w-[800px]">
                 <thead>
                     <tr className="bg-[#F8F8F8] border-2 border-gray-300 h-14">
                           <th className="p-3 text-left">

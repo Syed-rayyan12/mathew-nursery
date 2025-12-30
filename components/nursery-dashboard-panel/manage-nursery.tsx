@@ -66,9 +66,9 @@ export default function ManageNursery() {
 
   return (
     <>
-      <div>
-        <div className='flex justify-between items-center'>
-          <div>
+      <div className=''>
+        <div className=' bg-white rounded-md p-4 w-full flex justify-between items-center max-sm:flex-col max-sm:items-start gap-4'>
+          <div className='flex flex-col gap-1 '>
             <h2 className='text-secondary font-medium text-[48px] font-heading'><span className='text-foreground'>MANAGE</span> NURSERY</h2>
             <p>Manage your saved nurseries and compare options</p>
             <div className='pt-4'>

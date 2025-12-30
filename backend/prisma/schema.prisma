@@ -14,6 +14,7 @@ model User {
   firstName   String
   lastName    String
   phone       String?
+  address     String?
   role        Role        @default(PARENT)
   avatar      String?
   isVerified  Boolean     @default(false)
@@ -222,4 +223,28 @@ enum ArticleCategory {
 enum ReviewType {
   NURSERY  // Review for individual nursery
   GROUP    // Review for nursery group
+}
+
+
+model Notification {
+  id        String   @id @default(cuid())
+
+  title     String   @db.Text
+  message   String   @db.Text
+
+  entity    NotificationEntity
+  entityId  String
+
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+enum NotificationEntity {
+  USER
+  NURSERY
+  GROUP
+  REVIEW
 }

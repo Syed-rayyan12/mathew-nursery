@@ -2,28 +2,28 @@ import React from 'react'
 
 const OurStory = () => {
     return (
-        <section className="w-full bg-[#F2F4F5] mb-20">
-            <div className="flex item-center">
+        <section className="w-full bg-[#F2F4F5] mb-20 max-sm:mb-10">
+            <div className="flex max-lg:flex-col item-center">
                 {/* Image */}
 
                 <img
                     src="/images/our-story.png"
                     alt="Our Story"
-                    className="w-full h-auto"
+                    className="w-full max-lg:w-full h-auto"
                 />
 
 
                 {/* Content */}
 
                 {/* Heading */}
-                <div className='px-6 py-10'>
+                <div className='px-6 max-sm:px-4 py-10 max-sm:py-6'>
 
-                    <h2 className="text-4xl md:text-5xl font-heading font-medium text-gray-900 mb-4">
+                    <h2 className="text-4xl md:text-5xl max-sm:text-3xl font-heading font-medium text-gray-900 mb-4 max-sm:mb-3">
                         Our <span className="text-secondary">Story</span>
                     </h2>
 
                     {/* Paragraph */}
-                    <p className="text-foreground leading-relaxed mb-8 font-sans text-[18px]">
+                    <p className="text-foreground leading-relaxed mb-8 max-sm:mb-6 font-sans text-[18px] max-sm:text-base">
                         Choosing the right nursery is one of the most important decisions a family will ever make — but for years, parents struggled with scattered information, outdated listings, and unreliable reviews. We saw the stress and uncertainty this created and knew there had to be a better way.
                         <br /><br />
                         Our platform was created with a simple mission: to bring transparency, trust, and clarity to childcare discovery.

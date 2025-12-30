@@ -89,12 +89,12 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
     <>
       <MiniNav />
       <Header />
-      <div className="w-full mx-auto  py-10 px-24 shadow-xl bg-white">
+      <div className="w-full mx-auto py-6 md:py-10 px-4 md:px-12 lg:px-24 shadow-xl bg-white">
         {/* HEADER SECTION */}
-        <div className="bg-white p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white p-3 md:p-4 rounded-[6px] shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]">
+          <div className="flex  md:flex-row items-start md:items-center justify-between gap-4 mb-4">
             <div>
-              <h2 className="text-[48px] font-bold text-[#1F2937] font-medium">{group.name.toUpperCase()}</h2>
+              <h2 className="text-2xl md:text-3xl lg:text-[48px] font-bold text-[#1F2937] font-medium">{group.name.toUpperCase()}</h2>
               {/* <p className="text-gray-700 mb-2">{group.city || ''} {group.postcode || ''}</p>
               <p className="text-gray-600">{group.phone || ''}</p>
               <p className="text-gray-600">{group.email || ''}</p> */}
@@ -104,9 +104,9 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
                 <Image 
                   src={group.logo || "/images/group-1.png"} 
                   alt={`${group.name} logo`}
-                  width={150}
-                  height={150}
-                  className="object-contain"
+                  width={120}
+                  height={120}
+                  className="object-contain md:w-[150px] md:h-[150px]"
                 />
               </div>
             </div>
@@ -130,11 +130,19 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
             </button> */}
           </div>
           {/* IMAGES SLIDER */}
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <Swiper
               modules={[Navigation, Pagination, Autoplay]}
               spaceBetween={12}
-              slidesPerView={2}
+              slidesPerView={1}
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                },
+                1024: {
+                  slidesPerView: 2,
+                },
+              }}
               onSwiper={(swiper) => (swiperRef.current = swiper)}
               autoplay={{ delay: 3500, disableOnInteraction: false }}
               pagination={{ clickable: true }}
@@ -149,7 +157,7 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
                   <SwiperSlide key={index}>
                     <img
                       src={image}
-                      className="h-96 w-full object-cover rounded-lg"
+                      className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                       alt={`${group.name} - Image ${index + 1}`}
                     />
                   </SwiperSlide>
@@ -159,28 +167,28 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
                   <SwiperSlide>
                     <img
                       src={group.cardImage || group.logo || "/images/group-1.png"}
-                      className="h-96 w-full object-cover rounded-lg"
+                      className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                       alt={group.name}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="/images/group-2.png"
-                      className="h-96 w-full object-cover rounded-lg"
+                      className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                       alt={`${group.name} - Image 2`}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="/images/group-3.png"
-                      className="h-96 w-full object-cover rounded-lg"
+                      className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                       alt={`${group.name} - Image 3`}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="/images/group-4.png"
-                      className="h-96 w-full object-cover rounded-lg"
+                      className="h-56 md:h-80 lg:h-96 w-full object-cover rounded-lg"
                       alt={`${group.name} - Image 4`}
                     />
                   </SwiperSlide>
@@ -191,24 +199,24 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
         </div>
 
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* LEFT MAIN CONTENT */}
-          <div className="col-span-2 bg-white mt-10 px-4 pt-3 pb-20 shadow-[0px_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px]">
-            <h2 className="text-[34px] font-bold text-[#1F2937] font-medium">About {group.name}</h2>
-            <p className="font-medium text-[16px] font-sans text-muted-foreground mb-8">
+          <div className="col-span-1 lg:col-span-2 bg-white overflow-hidden mt-6 md:mt-10 px-3 md:px-4 pt-3 pb-10 md:pb-20 shadow-[0px_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] rounded-[6px]">
+            <h2 className="text-xl md:text-2xl lg:text-[34px] font-bold text-[#1F2937] font-medium">About {group.name}</h2>
+            <p className="font-medium text-sm md:text-base font-sans text-muted-foreground mb-6 md:mb-8">
               {group.aboutUs || 'A trusted nursery group providing quality childcare and early years education.'}
             </p>
           </div>
 
           {/* RIGHT CONTACT CARD */}
-          <div className="p-4 rounded-[6px] border-none shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] mt-10 h-fit sticky top-10">
-            <h2 className="text-[32px] font-medium mb-4 font-heading border-b">Contact Our Group</h2>
-            <p className="font-medium text-[14px] font-sans text-muted-foreground">123 HGet in touch to learn more about our nurseries or to arrange visits across multiple locations.</p>
+          <div className="p-3 md:p-4 rounded-[6px] border-none shadow-[0_4px_4px_4px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] mt-6 md:mt-10 h-fit lg:sticky lg:top-10">
+            <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium mb-3 md:mb-4 font-heading border-b pb-2">Contact Our Group</h2>
+            <p className="font-medium text-xs md:text-sm font-sans text-muted-foreground">123 HGet in touch to learn more about our nurseries or to arrange visits across multiple locations.</p>
             <div className="flex flex-col items-center gap-2">
-              <Button className="mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300">
+              <Button className="mt-4 md:mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300 text-sm md:text-base py-5">
                 Book Group Visit
               </Button>
-              <Button className="mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300">
+              <Button className="mt-4 md:mt-5 w-full bg-primary hover:bg-blue-600 rounded-[6px] hover:text-primary hover:bg-transparent cursor-pointer border-2 border-primary transition-all duration-300 text-sm md:text-base py-5">
                 Download Brochure
               </Button>
             </div>
@@ -216,36 +224,36 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
 
         </div>
 
-        <div className="pt-20 pb-40">
-          <h2 className="text-[34px] font-bold text-[#1F2937] font-medium mb-8">Our Nurseries</h2>
-          <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-34 gap-6">
+        <div className="pt-10 md:pt-20 pb-20 md:pb-40">
+          <h2 className="text-xl md:text-2xl lg:text-[34px] font-bold text-[#1F2937] font-medium mb-6 md:mb-8">Our Nurseries</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {nurseries && nurseries.length > 0 ? (
               nurseries.map((nursery: any) => (
                 <div
                   key={nursery.id}
-                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-80"
+                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 h-72 md:h-80"
                 >
                   <Link href={`/products/${nursery.slug}`}>
                     <img src={nursery.cardImage || nursery.images?.[0] || '/images/nursery-1.png'} alt={nursery.name} className="w-full h-full object-cover rounded-xl" />
                   </Link>
 
-                  <div className="absolute top-60 left-0 right-0 px-4 py-6 mx-4 shadow-lg bg-white rounded-lg">
-                    <h3 className="font-heading text-[24px] font-medium text-[#044A55]">{nursery.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{nursery.city}</p>
+                  <div className="absolute top-52 md:top-60 left-0 right-0 px-3 md:px-4 py-4 md:py-6 mx-3 md:mx-4 shadow-lg bg-white rounded-lg">
+                    <h3 className="font-heading text-lg md:text-[24px] font-medium text-[#044A55]">{nursery.name}</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mb-2">{nursery.city}</p>
                     <div className="flex items-center gap-1 mb-2">
                       {Array.from({ length: 5 }, (_, i) => (
                         <Star 
                           key={i} 
                           className={i < Math.round(nursery.averageRating || 0) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"} 
-                          size={16} 
+                          size={14} 
                         />
                       ))}
-                      <span className="text-sm ml-2 text-foreground">{nursery.reviewCount || 0} reviews</span>
+                      <span className="text-xs md:text-sm ml-2 text-foreground">{nursery.reviewCount || 0} reviews</span>
                     </div>
 
                     <Link href={`/profile?slug=${nursery.slug}`}>
-                      <div className='mt-4 flex items-center pt-2'>
-                        <Button className='text-secondary bg-transparent hover:bg-transparent cursor-pointer font-heading text-[20px] uppercase'>View Nursery</Button>
+                      <div className='mt-2 md:mt-4 flex items-center pt-2'>
+                        <Button className='text-secondary bg-transparent hover:bg-transparent cursor-pointer font-heading text-base md:text-[20px] uppercase px-2'>View Nursery</Button>
                         <ArrowRight className='text-secondary size-5' />
                       </div>
                     </Link>
@@ -253,8 +261,8 @@ export default function NurseryGroupPage({ params }: { params: Promise<{ slug: s
                 </div>
               ))
             ) : (
-              <div className="col-span-3 text-center py-10">
-                <p className="text-gray-500">No nurseries in this group yet.</p>
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10">
+                <p className="text-gray-500 text-sm md:text-base">No nurseries in this group yet.</p>
               </div>
             )}
           </div>

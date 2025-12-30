@@ -27,17 +27,17 @@ const features = [
 
 const FeaturesCardsSection = () => {
     return (
-        <div className="py-16 px-24  relative bg-white">
+        <div className="py-16 px-24 max-lg:px-0 relative bg-white">
             <div>
                 <div className='text-center'>
                     <p className="text-primary font-medium font-heading text-2xl">Reviews & Awards</p>
                     <h2 className="text-4xl md:text-5xl font-heading font-medium mb-2 text-foreground leading-tight">
-                       Nursery Reviews &  <span className="text-secondary">Awards</span>
+                       Nursery Reviews & <span className="text-secondary">Awards</span>
                     </h2>
-                    <p className='text-[16px] font-ubuntu mb-9'>At My Nursery, we celebrate excellence in early years care.</p>
+                    <p className='text-[16px] font-ubuntu mb-9 px-12'>At My Nursery, we celebrate excellence in early years care.</p>
                 </div>
-                <div className='mx-auto px-36 max-2xl:px-6 max-sm:px-10 max-lg:px-36'>
-                    <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-34 gap-6">
+                <div className='mx-auto px-32 max-2xl:px-6 max-sm:px-8 max-lg:px-36'>
+                    <div className="grid grid-cols-3 max-lg:grid-cols-1 max-lg:gap-10 max-sm:gap-10 gap-6">
                         {features.map((feature, index) => (
                             <div
                                 key={index}

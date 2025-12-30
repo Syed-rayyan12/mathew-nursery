@@ -22,6 +22,8 @@ export interface User {
   firstName: string;
   lastName: string;
   phone?: string;
+  address?: string;
+  nurseryName?: string;
   role: string;
   avatar?: string;
   isVerified?: boolean;
@@ -41,6 +43,7 @@ export interface UpdateProfileData {
   email?: string;
   phone?: string;
   avatar?: string;
+  address?: string;
 }
 
 export interface ChangePasswordData {

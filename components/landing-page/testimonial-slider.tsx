@@ -89,9 +89,9 @@ export default function TestimonialSlider() {
         <Carousel setApi={setApi} className="w-full max-w-4xl mx-auto">
           <CarouselContent>
             {testimonials.map((testimonial) => (
-              <CarouselItem key={testimonial.id} className="md:basis-1/3 lg:basis-1/3">
+              <CarouselItem key={testimonial.id} className="sm:basis-1/2 lg:basis-1/3">
                 <div
-                  className="relative px-6 py-14 rounded-lg min-h-[400px] flex flex-col items-center"
+                  className="relative px-6 max-lg:px-12 py-14 rounded-lg min-h-[400px] w-full flex flex-col items-center"
                   style={{
                     backgroundImage: `url(${testimonial.background})`,
                     backgroundSize: 'contain',
