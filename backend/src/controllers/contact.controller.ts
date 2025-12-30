@@ -84,7 +84,7 @@ export const getAllContacts = async (
   }
 };
 
-export const markAsRead = async (
+export const markContactAsRead = async (
   req: Request,
   res: Response,
   next: NextFunction

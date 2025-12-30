@@ -37,7 +37,7 @@ const NurseryCardsSection = () => {
             
             if (response.success && response.data) {
                 // Get first 3 nurseries or all available
-                const displayNurseries = response.data.slice(0, 3).map(nursery => ({
+                const displayNurseries = response.data.data.slice(0, 3).map(nursery => ({
                     id: nursery.id,
                     name: nursery.name,
                     slug: nursery.slug,

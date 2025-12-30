@@ -95,7 +95,7 @@ export const nurseryService = {
       }
     }
     
-    return apiClient.get<{ success: boolean; data: Nursery[]; count: number }>(endpoint);
+    return apiClient.get<{ data: Nursery[]; count: number }>(endpoint);
   },
 
   // Get nursery by slug (for public viewing)
