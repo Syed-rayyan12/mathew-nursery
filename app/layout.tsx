@@ -1,21 +1,34 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, K2D } from "next/font/google";
 import "./globals.css";
-import Header from "../components/landing-page/header";
-import Footer from "../components/landing-page/footer";
-import MiniNav from "@/components/landing-page/little-nav";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner"; 
+import localFont from "next/font/local";
 
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  subsets: ["latin"],
-  weight: "400",
+
+const k2d = localFont({
+  variable: "--font-k2d",
+  display: "swap",
+  src: [
+    { path: "/fonts/k2d/K2D-Thin.woff2", weight: "100", style: "normal" },
+    { path: "/fonts/k2d/K2D-ExtraLight.woff2", weight: "200", style: "normal" },
+    { path: "/fonts/k2d/K2D-Light.woff2", weight: "300", style: "normal" },
+    { path: "/fonts/k2d/K2D-Regular.woff2", weight: "400", style: "normal" },
+    { path: "/fonts/k2d/K2D-Medium.woff2", weight: "500", style: "normal" },
+    { path: "/fonts/k2d/K2D-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "/fonts/k2d/K2D-Bold.woff2", weight: "700", style: "normal" },
+    { path: "/fonts/k2d/K2D-ExtraBold.woff2", weight: "800", style: "normal" },
+  ],
 });
 
-const k2D = K2D({
-  variable: "--font-k2d",
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
+const bebasNeue = localFont({
+  variable: "--font-bebas-neue",
+  display: "swap",
+  src: [
+    {
+      path: "/fonts/bebas-neue/BebasNeue-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
 });
 
 
@@ -33,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${bebasNeue.variable} ${k2D.variable} antialiased`}
+        className={`${bebasNeue.variable} ${k2d.variable} antialiased`}
       >
 
         {children}
